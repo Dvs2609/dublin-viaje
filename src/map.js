@@ -158,27 +158,20 @@ function renderMarkers() {
   markers = [];
   const g = $('#mkg'), top = $('#topg'), rg = $('#routeg');
   g.innerHTML = ''; top.innerHTML = ''; rg.innerHTML = '';
-  const mode = S.mapMode;
-  const dayStops = mode !== 'all' ? S.days[mode].stops : [];
-  // Same numbers as the plan; skipped stops get none, matching the drawn route.
-  const stopIdx = new Map(dayStops.map((s, i) => [s, i]).filter(([s]) => !s.skipped).map(([s, i]) => [s.id, i + 1]));
-  if (mode !== 'all') {
-    const c = computeDay(mode);
-    if (c.rows.length) {
-      const pts = [c.start, ...c.rows.map(r => r.p), ...(c.back ? [hotelPt()] : [])];
-      mk('path', { d: pathD(pts.map(p => [p.lat, p.lon])), class: 'route' }, rg);
-    }
-  }
-  const ordered = PLACES.slice().sort((a, b) => (stopIdx.has(a.id) ? 1 : 0) - (stopIdx.has(b.id) ? 1 : 0));
+  const onlyList = S.mapMode === 'list';
+  const saved = new Map(S.list.map(x => [x.id, x]));
+  // Saved places are drawn last so they sit on top.
+  const ordered = PLACES.slice().sort((a, b) => (saved.has(a.id) ? 1 : 0) - (saved.has(b.id) ? 1 : 0));
   for (const p of ordered) {
+    const it = saved.get(p.id);
+    if (onlyList && !it) continue;
     const [x, y] = proj(p.lat, p.lon);
-    const n = stopIdx.get(p.id);
-    const cls = ['mk', n ? 'stop' : '', mode !== 'all' && !n ? 'dim' : '', selId === p.id ? 'sel' : ''].join(' ');
+    const cls = ['mk', it ? 'stop saved' : '', it && it.visited ? 'seen' : '', selId === p.id ? 'sel' : ''].join(' ');
     const el = mk('g', { class: cls, 'data-id': p.id }, g);
-    mk('circle', { r: n ? 11 : 7, fill: catVar(p.c) }, el);
+    mk('circle', { r: it ? 10 : 7, fill: catVar(p.c) }, el);
     mk('circle', { r: 18, class: 'hit' }, el);
-    if (n) { const t = mk('text', { class: 'num', 'text-anchor': 'middle', y: 4 }, el); t.textContent = n; }
-    const t = mk('text', { class: 'name', x: n ? 14 : 10, y: 4 }, el); t.textContent = p.n;
+    if (it) { const t = mk('text', { class: 'num', 'text-anchor': 'middle', y: 4 }, el); t.textContent = it.visited ? '✓' : '★'; }
+    const t = mk('text', { class: 'name', x: it ? 13 : 10, y: 4 }, el); t.textContent = p.n;
     markers.push({ el, x, y, kind: 'poi' });
   }
   const h = hotelPt(), [hx, hy] = proj(h.lat, h.lon);
@@ -194,7 +187,7 @@ function renderMarkers() {
     mk('circle', { r: 7, fill: '#2F7BEA', stroke: '#fff', 'stroke-width': 2.5 }, ge);
     markers.push({ el: ge, x: gx, y: gy });
   }
-  $('#mapmode').innerHTML = [['all', 'Todo'], ...DAYKEYS.map(k => [k, 'Ruta ' + DAYS[k].short])].map(([k, n]) => `<button type="button" data-act="mapmode" data-day="${k}" aria-pressed="${mode === k}">${n}</button>`).join('');
+  $('#mapmode').innerHTML = [['all', 'Todos los sitios'], ['list', 'Nuestra lista']].map(([k, n]) => `<button type="button" data-act="mapmode" data-id="${k}" aria-pressed="${S.mapMode === k}">${n}</button>`).join('');
   applyView();
   renderMapCard();
 }
@@ -207,28 +200,18 @@ function renderMapCard() {
   const p = selId && BYID[selId];
   $('#mapnote').hidden = !!p;
   if (!p) { card.hidden = true; return; }
-  const m = dist(refPt(), p);
-  const idx = S.days[S.day].stops.findIndex(s => s.id === p.id);
+  const m = dist(here().from, p);
+  const it = listItem(p.id);
   card.hidden = false;
   card.innerHTML = `<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span class="t">${esc(p.n)}</span><button class="btn small" data-act="mapclose" aria-label="Cerrar">${IC.x}</button></div>
-    <div class="item-meta"><span class="dot" style="--c:${catVar(p.c)}"></span>${esc(CATS[p.c].one)} · ${walkMin(m)} min a pie · ${fmtMin(p.dur)} ${pill(hoursLabel(p))}</div>
-    <div class="row"><button class="btn small primary" data-act="open" data-id="${p.id}">Ver ficha</button>
-    <button class="btn small" data-act="add" data-id="${p.id}">${idx >= 0 ? `Quitar del ${DAYS[S.day].short}` : `+ Añadir al ${DAYS[S.day].short}`}</button></div>`;
+    <div class="item-meta"><span class="dot" style="--c:${catVar(p.c)}"></span>${esc(CATS[p.c].one)} · ${walkMin(m)} min a pie ${pill(hoursLabel(p))}</div>
+    <div class="row"><a class="btn small primary" href="${appleMaps(p, p.n)}" target="_blank" rel="noopener">${IC.nav}Cómo llegar</a>
+    <button class="btn small" data-act="open" data-id="${p.id}">Ficha</button>
+    <button class="btn small" data-act="save" data-id="${p.id}">${it ? '★ En la lista' : '☆ Guardar'}</button></div>`;
 }
-function showMap(focusId, mode) {
+function showMap(focusId) {
   setTab('map');
-  if (mode) S.mapMode = mode;
   if (focusId) selId = focusId;
   renderMarkers();
   if (focusId) { const p = BYID[focusId]; centerOn(p.lat, p.lon, Math.min(view.w, 1400)); }
-  else if (mode && mode !== 'all') {
-    const c = computeDay(mode);
-    const all = [c.start, ...c.rows.map(r => r.p)];
-    if (all.length > 1) {
-      const la = all.map(p => p.lat), lo = all.map(p => p.lon);
-      fitView([[Math.min(...la), Math.min(...lo)], [Math.max(...la), Math.max(...lo)]]);
-      applyView();
-    }
-  }
 }
-

@@ -1,5 +1,5 @@
 // Offline cache: everything is precached; Google Fonts are cached on first use.
-const CACHE = 'dublin-1f92474bd9';
+const CACHE = 'dublin-6f5a542baf';
 const ASSETS = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

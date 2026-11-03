@@ -437,29 +437,3 @@ const TRIPS = [
   { n: 'Howth y Malahide', p: '59 €', u: CIV + 'excursion-howth-malahide/', t: 'Pueblo pesquero con acantilados y castillo de Malahide, cerca de Dublín.' },
   { n: 'Estudios de Juego de Tronos', p: '≈ 62 €', u: CIV + 'excursion-estudios-juegos-tronos/', t: 'Los estudios de rodaje en Irlanda del Norte. Llevad documentación.' }
 ];
-
-// Ready-made routes the user can load and then rearrange.
-const TEMPLATES = {
-  jue: [
-    { n: 'Clásico del sur', d: 'Catedral, comida, Trinity, Grafton y el Green con luz, National Gallery (abre hasta tarde el jueves) y cena con música en Temple Bar.',
-      s: [['christchurch', 40], ['queenoftarts', 50], ['trinity', 75], ['grafton', 25], ['stephens', 25], ['natgallery', 60], ['templebar', 40], ['hapenny', 10], ['oldstorehouse', 90]] },
-    { n: 'Guinness y el Dublín medieval', d: 'Empezad por la Guinness (con comida dentro) y volved por San Patricio, el Chester Beatty y Temple Bar.',
-      s: [['guinness', 135], ['stpatricks', 40], ['chester', 35], ['templebar', 45], ['brazenhead', 90]] },
-    { n: 'Al norte del río', d: 'Ha\'penny Bridge, comida junto al río, O\'Connell Street, el museo del GPO, Parnell Square y cena en una iglesia con música en Smithfield.',
-      s: [['hapenny', 10], ['woollenmills', 60], ['oconnell', 20], ['joyce', 5], ['gpo', 75], ['procathedral', 15], ['remembrance', 15], ['hughlane', 40], ['capel', 20], ['thechurch', 75], ['cobblestone', 75]] },
-    { n: 'Museos gratis si llueve', d: 'Todo a cubierto y casi todo gratis, con la National Gallery abierta hasta tarde el jueves.',
-      s: [['chester', 50], ['thebank', 60], ['archaeology', 60], ['naturalhistory', 30], ['natgallery', 75], ['powerscourt', 20], ['gallaghers', 70]] }
-  ],
-  vie: [
-    { n: 'Cena irlandesa y música', d: 'Cena tradicional y luego pub con música en directo.', s: [['gallaghers', 70], ['thetemplebar', 40], ['stagshead', 40]] },
-    { n: 'Cerca del hotel (Christchurch)', d: 'Pocos pasos después de un día largo de excursión.', s: [['brazenhead', 120]] }
-  ],
-  sab: [
-    { n: 'Norte del Liffey', d: 'Ha\'penny Bridge, O\'Connell Street, el museo del GPO y comida rápida cerca del bus al aeropuerto.',
-      s: [['hapenny', 10], ['oconnell', 20], ['gpo', 75], ['henry', 25], ['beshoff', 35]] },
-    { n: 'Catedrales y mercado', d: 'San Patricio a primera hora, Marsh y el mercado de comida de Temple Bar para comer.',
-      s: [['stpatricks', 45], ['marsh', 25], ['christchurch', 40], ['foodmarket', 45]] },
-    { n: 'Lo que faltó de Trinity', d: 'Si el jueves no dio tiempo: Trinity a primera hora, Grafton y comida.',
-      s: [['trinity', 75], ['molly', 5], ['grafton', 25], ['avoca', 50]] }
-  ]
-};
