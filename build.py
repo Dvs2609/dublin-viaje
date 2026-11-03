@@ -9,7 +9,7 @@ DIST.mkdir(exist_ok=True)
 
 shell = (SRC / 'app.html').read_text()
 data = (SRC / 'data.js').read_text()
-app = (SRC / 'app.js').read_text()
+app = (SRC / 'map.js').read_text() + '\n' + (SRC / 'app.js').read_text()
 
 def fragment(pwa):
     js = app.replace('/*__PWA__*/false', 'true' if pwa else 'false')
