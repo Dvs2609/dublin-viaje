@@ -369,6 +369,7 @@ const PLACES = [
 ];
 
 const TRIPS = [
+  { n: 'Cork, castillo de Cahir y Roca de Cashel', p: '≈ 95–110 €', u: CIV + 'excursion-cork/', t: 'Unas 12 h con guía en español. Sale de George\'s Quay (centro). Castillo de Cahir, tiempo libre en Cork y la Roca de Cashel. Comida no incluida. Algunos viajeros dicen que el tiempo en Cork se queda corto.' },
   { n: 'Acantilados de Moher y Galway', p: '99 €', u: CIV + 'excursion-acantilados-moher/', t: 'La más popular. Unos 12–13 h con muchas horas de bus. Acantilados de 200 m sobre el Atlántico y paseo por Galway.' },
   { n: 'Belfast, Calzada del Gigante y castillo de Dunluce', p: '99 €', u: CIV + 'belfast-calzada-gigante-castillo-dunluce/', t: 'Columnas de basalto en la costa de Irlanda del Norte. Llevad pasaporte o DNI: se cruza a Reino Unido.' },
   { n: 'Wicklow y Glendalough', p: '59 €', u: CIV + 'excursion-wicklow/', t: 'Montañas, lagos y el monasterio de Glendalough. Más corta (unas 8 h): volveríais a tiempo de cenar con calma.' },
