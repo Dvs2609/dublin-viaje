@@ -57,6 +57,17 @@ await shot('7-info' + sfx);
 console.log('overflow-x', await ev(`document.documentElement.scrollWidth > innerWidth || document.body.scrollWidth > innerWidth`));
 await sleep(1500);
 console.log('sw controller', await ev(`!!navigator.serviceWorker.controller`), 'caches', await ev(`caches.keys().then(k=>k.join(','))`));
+
+// Regression checks for the Codex review fixes.
+await ev(`(()=>{S.day='jue';S.days.jue.stops=PLACES.filter(p=>p.c!=='comer').slice(0,12).map(p=>({id:p.id,dur:20}));save();setTab('plan')})()`); await sleep(200);
+console.log('gmaps links for 12 stops', await ev(`gmapsRoutes('jue').length`), await ev(`[...document.querySelectorAll('a.btn')].filter(a=>a.href.includes('maps/dir')).length`));
+console.log('all stops covered', await ev(`(()=>{const u=gmapsRoutes('jue');const n=u.map(x=>{const q=new URL(x).searchParams;return (q.get('waypoints')||'').split('|').filter(Boolean).length+2}).reduce((a,b)=>a+b,0)-(u.length-1);return n})()`), '(expect 14)');
+console.log('import clamps', await ev(`unpackPlan('DUBLIN1:'+btoa(JSON.stringify({v:1,h:'parnell',d:{jue:{x:[['trinity',-50],['castle',99999],['nope',10],'bad']}}}))).days.jue.stops.map(s=>s.dur).join(',')`), '(expect 5,360)');
+await ev(`(()=>{S.hotel='christchurch';snapshot();S.hotel='parnell';restore();})()`);
+console.log('undo restores hotel', await ev(`S.hotel`));
+await ev(`setTab('explore')`); await ev(`document.querySelector('[data-act=open][data-id=castle]').click()`); await sleep(150);
+await ev(`document.querySelector('[data-act=mapfocus]').click()`); await sleep(900);
+console.log('after map focus: hash', await ev(`location.hash`), 'tab', await ev(`S.tab`), 'sheet hidden', await ev(`document.querySelector('#sheet').hidden`));
 console.log('LOGS:\n' + logs.join('\n'));
 ws.close(); chrome.kill(); (await import('node:child_process')).spawnSync('pkill', ['-f', '[r]emote-debugging-port=93']);
 process.exit(0);

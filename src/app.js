@@ -45,8 +45,8 @@ let saveT;
 function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 120); }
 
 let undoSnap = null;
-function snapshot() { undoSnap = JSON.stringify(S.days); }
-function restore() { if (!undoSnap) return; S.days = JSON.parse(undoSnap); undoSnap = null; save(); renderAll(); }
+function snapshot() { undoSnap = JSON.stringify({ days: S.days, hotel: S.hotel }); }
+function restore() { if (!undoSnap) return; const u = JSON.parse(undoSnap); S.days = u.days; S.hotel = u.hotel; undoSnap = null; save(); renderAll(); }
 
 // ---------- Geo & time ----------
 let GPS = null;
@@ -62,6 +62,7 @@ function dist(a, b) {
 const walkMin = m => Math.max(1, Math.round(m * 1.25 / 78));
 const fmtDist = m => m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`;
 const fmtMin = n => n < 60 ? `${n} min` : `${Math.floor(n / 60)} h${n % 60 ? ' ' + (n % 60) : ''}`;
+const clampDur = n => Math.max(5, Math.min(360, Math.round(n / 5) * 5 || 5));
 const toMin = s => { const m = /^(\d{1,2}):(\d{2})/.exec(s || ''); return m ? +m[1] * 60 + +m[2] : null; };
 const fromMin = n => { n = ((Math.round(n) % 1440) + 1440) % 1440; return `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`; };
 const gpsInDublin = () => GPS && dist(GPS, hotelPt()) < 30000;
@@ -215,18 +216,21 @@ function loadTemplate(dk, ti, append) {
   save(); renderAll();
   toast(append ? 'Ruta añadida al final' : `Ruta "${tpl.n}" cargada`, 'Deshacer', restore);
 }
-function gmapsRoute(dk) {
+// Google Maps takes at most 9 waypoints per link, so long days become several consecutive links.
+function gmapsRoutes(dk) {
   const c = computeDay(dk);
-  if (!c.rows.length) return null;
+  const stops = c.rows.filter(r => !r.s.done).map(r => r.p);
+  if (!stops.length) return [];
   const f = p => `${p.lat.toFixed(5)},${p.lon.toFixed(5)}`;
-  const pts = c.rows.filter(r => !r.s.done).map(r => r.p);
-  if (!pts.length) return null;
-  const back = S.days[dk].back;
-  const dest = back ? hotelPt() : pts[pts.length - 1];
-  const way = (back ? pts : pts.slice(0, -1)).slice(0, 9);
-  let u = `https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=${f(GPS && gpsInDublin() ? GPS : c.start)}&destination=${f(dest)}`;
-  if (way.length) u += '&waypoints=' + encodeURIComponent(way.map(f).join('|'));
-  return u;
+  const seq = [GPS && gpsInDublin() ? GPS : c.start, ...stops, ...(S.days[dk].back ? [hotelPt()] : [])];
+  const urls = [];
+  for (let i = 0; i < seq.length - 1; i += 10) {
+    const leg = seq.slice(i, i + 11);
+    let u = `https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=${f(leg[0])}&destination=${f(leg[leg.length - 1])}`;
+    if (leg.length > 2) u += '&waypoints=' + encodeURIComponent(leg.slice(1, -1).map(f).join('|'));
+    urls.push(u);
+  }
+  return urls;
 }
 const gmapsPlace = p => `https://www.google.com/maps/search/?api=1&query=${p.lat.toFixed(5)},${p.lon.toFixed(5)}`;
 
@@ -353,13 +357,24 @@ function openDetail(id) {
   }
   $('#sheet-body').scrollTop = 0;
 }
-function closeDetail(fromPop) {
-  if ($('#sheet').hidden) return;
+let afterPop = null;
+function closeDetail(fromPop, then) {
+  if ($('#sheet').hidden) { if (then) then(); return; }
   $('#sheet').hidden = true; sheetId = null;
-  if (!fromPop && sheetPushed) { sheetPushed = false; try { history.back(); } catch (e) { /* ignore */ } }
+  if (!fromPop && sheetPushed) {
+    sheetPushed = false;
+    // Run the follow-up once the history entry is gone, so it is not undone by the pending back().
+    if (then) { afterPop = then; setTimeout(() => { if (afterPop === then) { afterPop = null; then(); } }, 500); }
+    try { history.back(); } catch (e) { /* ignore */ }
+    return;
+  }
   sheetPushed = false;
+  if (then) then();
 }
-window.addEventListener('popstate', () => closeDetail(true));
+window.addEventListener('popstate', () => {
+  closeDetail(true);
+  if (afterPop) { const f = afterPop; afterPop = null; f(); }
+});
 
 // ---------- Plan view ----------
 function renderPlan() {
@@ -398,7 +413,7 @@ function renderPlan() {
       ? `<div class="banner limitmsg" style="background:var(--bad-soft)"><div><b style="color:var(--bad)">Os pasáis ${fmtMin(diff)}</b> de la hora límite (${d.limit}). Quitad o acortad alguna parada.</div></div>`
       : `<p class="muted limitmsg">Margen de ${fmtMin(-diff)} antes de las ${d.limit}.</p>`;
   }
-  const url = gmapsRoute(dk);
+  const urls = gmapsRoutes(dk);
   const tpls = TEMPLATES[dk].map((t, i) => `<div class="tpl-item"><b>${esc(t.n)}</b><p>${esc(t.d)}</p>
       <p>${t.s.map(([id]) => esc(BYID[id]?.n || id)).join(' → ')}</p>
       <div class="row"><button class="btn small primary" data-act="tpl" data-i="${i}">Cargar ruta</button><button class="btn small" data-act="tpladd" data-i="${i}">Añadir al final</button></div></div>`).join('');
@@ -416,7 +431,7 @@ function renderPlan() {
       ${c.rows.length ? `<div class="actions">
         <button class="btn" data-act="opt">${IC.shuffle}Optimizar orden</button>
         <button class="btn" data-act="mapday">${IC.map}Ver en el mapa</button>
-        ${url ? `<a class="btn" href="${url}" target="_blank" rel="noopener">${IC.ext}Ruta en Google Maps</a>` : ''}
+        ${urls.map((u, n) => `<a class="btn" href="${u}" target="_blank" rel="noopener">${IC.ext}Ruta en Google Maps${urls.length > 1 ? ` (${n + 1}/${urls.length})` : ''}</a>`).join('')}
       </div>` : ''}
     </div>
     ${c.rows.length ? `<ol class="tl">${tl}</ol>
@@ -445,7 +460,7 @@ function unpackPlan(txt) {
   for (const k of DAYKEYS) {
     const x = (o.d || {})[k] || {}, def = defState().days[k];
     days[k] = { start: x.s || def.start, from: x.f || 'hotel', back: x.b !== 0, limit: x.l ?? def.limit, notes: x.n || '',
-      stops: (x.x || []).filter(s => BYID[s[0]]).map(s => ({ id: s[0], dur: +s[1] || BYID[s[0]].dur, done: !!s[2] })) };
+      stops: (Array.isArray(x.x) ? x.x : []).filter(s => Array.isArray(s) && BYID[s[0]]).map(s => ({ id: s[0], dur: clampDur(+s[1] || BYID[s[0]].dur), done: !!s[2] })) };
   }
   return { hotel: HOTELS[o.h] ? o.h : S.hotel, days };
 }
@@ -805,7 +820,7 @@ document.addEventListener('click', e => {
     case 'cat': S.cat = id; save(); renderCats(); renderList(); break;
     case 'day': S.day = el.dataset.day; save(); renderAll(); break;
     case 'hotel': S.hotel = id; save(); renderAll(); toast(`Hotel: ${HOTELS[id].name}`); break;
-    case 'dur': d.stops[i].dur = Math.max(5, Math.min(360, d.stops[i].dur + v)); save(); renderPlan(); break;
+    case 'dur': d.stops[i].dur = clampDur(d.stops[i].dur + v); save(); renderPlan(); break;
     case 'mv': { const j = i + v; if (j < 0 || j >= d.stops.length) break; [d.stops[i], d.stops[j]] = [d.stops[j], d.stops[i]]; save(); renderPlan(); break; }
     case 'done': d.stops[i].done = !d.stops[i].done; save(); renderPlan(); break;
     case 'del': snapshot(); d.stops.splice(i, 1); save(); renderPlan(); toast('Parada quitada', 'Deshacer', restore); break;
@@ -814,7 +829,7 @@ document.addEventListener('click', e => {
     case 'tpladd': loadTemplate(S.day, i, true); break;
     case 'clear': snapshot(); d.stops = []; save(); renderPlan(); toast('Día vaciado', 'Deshacer', restore); break;
     case 'mapday': showMap(null, S.day); break;
-    case 'mapfocus': closeDetail(); showMap(id); break;
+    case 'mapfocus': closeDetail(false, () => showMap(id)); break;
     case 'mapmode': S.mapMode = el.dataset.day; save(); showMap(null, S.mapMode); break;
     case 'mapclose': selectOnMap(null); break;
     case 'export': {
