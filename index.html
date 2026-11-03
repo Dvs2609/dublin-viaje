@@ -1,0 +1,1643 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17664E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dublín">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Dublín de bolsillo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: one-screen phone app. Header, scrolling view, bottom tab bar. Category colours borrowed from Georgian doors. */
+:root {
+  --bg: #EDF1F2;
+  --surface: #FFFFFF;
+  --surface-2: #E3E9EB;
+  --ink: #14212A;
+  --muted: #566A75;
+  --line: #CFD9DD;
+  --accent: #17664E;
+  --accent-soft: #D6EBE3;
+  --on-accent: #FFFFFF;
+  --toast-act: #7FE0B8;
+  --warn: #A55A00;
+  --warn-soft: #FBEBD3;
+  --bad: #B0302A;
+  --bad-soft: #F7DEDC;
+  --good: #1F7A45;
+  --c-ver: #B5372B;
+  --c-museo: #2A5A9C;
+  --c-calle: #B07B0C;
+  --c-parque: #3B8A4E;
+  --c-comer: #8A4BA6;
+  --c-pub: #6A4528;
+  --water: #A9CBDD;
+  --park: #CFE3C8;
+  --street: #FFFFFF;
+  --street-edge: #C8D2D6;
+  --campus: #E2E2D6;
+  --f-display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E161B; --surface: #172229; --surface-2: #1F2D35; --ink: #E4ECEF; --muted: #95A8B2; --line: #2C3D46;
+    --accent: #4DBB91; --accent-soft: #173B30; --on-accent: #06140F; --toast-act: #0F5A43;
+    --warn: #F0A646; --warn-soft: #3A2A12; --bad: #F07A70; --bad-soft: #3D1C1A; --good: #5CCB86;
+    --c-ver: #EE7A6C; --c-museo: #7EA8E8; --c-calle: #E2B045; --c-parque: #6FC283; --c-comer: #C38BDE; --c-pub: #C79A72;
+    --water: #1D4559; --park: #1D3326; --street: #34454E; --street-edge: #22323A; --campus: #252F2B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E161B; --surface: #172229; --surface-2: #1F2D35; --ink: #E4ECEF; --muted: #95A8B2; --line: #2C3D46;
+  --accent: #4DBB91; --accent-soft: #173B30; --on-accent: #06140F; --toast-act: #0F5A43;
+  --warn: #F0A646; --warn-soft: #3A2A12; --bad: #F07A70; --bad-soft: #3D1C1A; --good: #5CCB86;
+  --c-ver: #EE7A6C; --c-museo: #7EA8E8; --c-calle: #E2B045; --c-parque: #6FC283; --c-comer: #C38BDE; --c-pub: #C79A72;
+  --water: #1D4559; --park: #1D3326; --street: #34454E; --street-edge: #22323A; --campus: #252F2B;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.45 var(--f-body);
+  display: flex; flex-direction: column; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+*, *::before, *::after { box-sizing: border-box; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Header */
+.top { background: var(--surface); border-bottom: 1px solid var(--line); padding-block: 10px 10px; display: flex; align-items: center; gap: 12px; }
+.brand { flex: 1; min-width: 0; }
+.brand h1 { margin: 0; font: 800 21px/1.05 var(--f-display); letter-spacing: -0.01em; }
+.brand small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.netpill { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.netpill.on { background: var(--accent-soft); color: var(--accent); }
+
+main { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; -webkit-overflow-scrolling: touch; }
+.view { padding-block: 14px 28px; }
+.view[hidden] { display: none !important; }
+
+/* Bottom tabs */
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--line); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.tabs button { background: none; border: 0; padding: 8px 4px 9px; display: grid; justify-items: center; gap: 2px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.tabs button svg { width: 22px; height: 22px; }
+.tabs button[aria-selected="true"] { color: var(--accent); }
+
+/* Common bits */
+.h2 { font: 800 19px/1.15 var(--f-display); margin: 0 0 8px; text-wrap: balance; }
+.label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.muted { color: var(--muted); }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 12px; border-radius: 10px; font-weight: 600; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; text-decoration: none; color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.small { padding: 5px 9px; font-size: 13px; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--surface); padding: 6px 11px; border-radius: 99px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface-2); padding: 3px; border-radius: 11px; gap: 3px; }
+.seg button { border: 0; background: none; padding: 7px 6px; border-radius: 8px; font-weight: 700; font-size: 14px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.banner { background: var(--warn-soft); color: var(--ink); border-radius: var(--r); padding: 12px; display: grid; gap: 8px; margin-bottom: 14px; }
+.banner b { color: var(--warn); }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+.pill.good { background: var(--accent-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.neutral { background: var(--surface-2); color: var(--muted); }
+.district { font: 700 11px/1 var(--f-body); letter-spacing: .04em; border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; color: var(--muted); }
+
+/* Explore */
+.search { position: relative; }
+.search input { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 40px 12px 40px; font-size: 16px; }
+.search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); }
+.search .clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: none; padding: 8px; color: var(--muted); font-size: 18px; line-height: 1; }
+.explore-tools { display: grid; gap: 10px; margin-bottom: 12px; }
+.refline { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.refline select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 4px 6px; font-size: 13px; font-weight: 600; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: 4px 1fr auto; overflow: hidden; }
+.item .bar { background: var(--c); }
+.item-main { padding: 10px 10px 10px 12px; min-width: 0; background: none; border: 0; text-align: left; }
+.item-name { font-weight: 700; font-size: 15.5px; line-height: 1.25; }
+.item-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.item-side { display: grid; align-content: center; justify-items: end; gap: 5px; padding: 8px 10px 8px 0; }
+.walk { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.add { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font-size: 20px; line-height: 1; font-weight: 600; display: grid; place-items: center; padding: 0; }
+.add.in { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-size: 12px; font-weight: 800; width: auto; padding: 0 8px; }
+.empty { text-align: center; color: var(--muted); padding: 30px 10px; }
+
+/* Detail sheet */
+.sheet { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.sheet[hidden] { display: none !important; }
+.sheet-head { display: flex; align-items: center; gap: 8px; padding-block: 8px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.sheet-head .x { border: 0; background: var(--surface-2); width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; padding: 0; flex: none; }
+.sheet-head .x svg { width: 20px; height: 20px; }
+.sheet-body { flex: 1; overflow-y: auto; padding-block: 16px 30px; display: flex; flex-direction: column; gap: 16px; }
+.sheet-body > * { flex-shrink: 0; }
+.d-cat { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); font-weight: 600; }
+.d-title { font: 800 26px/1.08 var(--f-display); margin: 4px 0 0; letter-spacing: -0.01em; text-wrap: balance; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.facts div { background: var(--surface); padding: 9px 10px; min-width: 0; }
+.facts b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; }
+.facts small { display: block; font-size: 11.5px; margin-top: 1px; }
+.facts span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.prose { margin: 0; max-width: 65ch; }
+.tipbox { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; }
+.addrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.addrow .btn { justify-content: center; }
+.addrow .btn.in { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.links { display: grid; gap: 8px; }
+.links a { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; text-decoration: none; color: var(--ink); font-weight: 600; }
+.links a small { color: var(--muted); font-weight: 500; }
+.near { display: grid; gap: 6px; }
+.near button { display: flex; align-items: center; gap: 8px; border: 0; background: var(--surface); border-radius: 10px; padding: 9px 10px; text-align: left; }
+.near button span.n { flex: 1; font-weight: 600; min-width: 0; }
+
+/* Plan */
+.plan-head { display: grid; gap: 10px; margin-bottom: 12px; }
+.day-note { font-size: 13.5px; color: var(--muted); margin: 0; }
+.settings { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.settings label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 700; }
+.settings input[type="time"], .settings select { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 6px 8px; font-size: 15px; font-weight: 600; color: var(--ink); width: 100%; }
+.settings .check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); font-weight: 600; grid-column: 1 / -1; }
+.settings .check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.actions .btn { padding: 7px 10px; font-size: 13.5px; }
+.tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.tl::before { content: ""; position: absolute; left: 17px; top: 14px; bottom: 14px; width: 2px; background: var(--line); }
+.tl li { position: relative; }
+.tl-node { display: flex; gap: 12px; align-items: center; padding: 6px 0; }
+.tl-node .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-weight: 800; flex: none; z-index: 1; }
+.tl-node time, .tl-stop time { font-variant-numeric: tabular-nums; font-weight: 800; }
+.tl-walk { padding: 2px 0 2px 48px; font-size: 12.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; min-height: 26px; flex-wrap: wrap; }
+.tl-walk svg { width: 14px; height: 14px; }
+.tl-walk .far { color: var(--warn); font-weight: 700; }
+.tl-sun { padding: 4px 0 4px 48px; font-size: 12.5px; font-weight: 700; color: var(--warn); display: flex; align-items: center; gap: 6px; }
+.tl-sun::before { content: ""; position: absolute; left: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--warn); }
+.tl-stop { display: grid; grid-template-columns: 36px 1fr; gap: 12px; padding: 4px 0; }
+.tl-stop .num { width: 36px; height: 36px; border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-weight: 800; z-index: 1; border: 3px solid var(--bg); }
+.tl-stop.done .num { background: var(--muted); }
+.tl-stop.done .card { opacity: .6; }
+.tl-stop.done .sname { text-decoration: line-through; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 6px; min-width: 0; }
+.card .r1 { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.sname { font-weight: 700; font-size: 15.5px; background: none; border: 0; padding: 0; text-align: left; line-height: 1.25; }
+.ctrl { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.ctrl button { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; min-width: 32px; height: 32px; padding: 0 6px; font-weight: 700; display: grid; place-items: center; }
+.ctrl button svg { width: 16px; height: 16px; }
+.ctrl .durv { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 46px; text-align: center; }
+.ctrl .sp { flex: 1; }
+.ctrl button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.totals { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; text-align: center; }
+.totals b { display: block; font: 800 19px/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.totals span { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.limitmsg { margin-top: 8px; }
+.tpl { display: grid; gap: 8px; margin-top: 8px; }
+.tpl-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 4px; }
+.tpl-item p { margin: 0; font-size: 13.5px; color: var(--muted); }
+details.box > summary { cursor: pointer; font-weight: 700; padding: 10px 0; list-style: none; display: flex; align-items: center; gap: 8px; }
+details.box > summary::-webkit-details-marker { display: none; }
+details.box > summary::before { content: "+"; width: 22px; height: 22px; border-radius: 6px; background: var(--surface-2); display: grid; place-items: center; font-weight: 800; }
+details.box[open] > summary::before { content: "−"; }
+textarea { width: 100%; min-height: 80px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px; font-size: 15px; resize: vertical; }
+
+/* Map */
+#view-map { position: absolute; inset: 0; padding: 0; }
+#map { width: 100%; height: 100%; display: block; touch-action: none; background: var(--bg); user-select: none; -webkit-user-select: none; }
+#map .river { fill: none; stroke: var(--water); stroke-linecap: round; stroke-linejoin: round; }
+#map .canal { fill: none; stroke: var(--water); stroke-width: 3px; vector-effect: non-scaling-stroke; }
+#map .park { fill: var(--park); }
+#map .campus { fill: var(--campus); }
+#map .st-edge { fill: none; stroke: var(--street-edge); stroke-width: 7px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+#map .st { fill: none; stroke: var(--street); stroke-width: 5px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+#map .route { fill: none; stroke: var(--ink); stroke-width: 3px; vector-effect: non-scaling-stroke; stroke-dasharray: 6 5; stroke-linejoin: round; }
+#map .mk circle { stroke: var(--surface); stroke-width: 2px; }
+#map .mk circle.hit { stroke: none; fill: transparent; }
+#map .mk text, #map .lbl text { font: 700 11px var(--f-body); fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+#map .mk .num { fill: #fff; stroke: none; font-size: 11px; font-weight: 800; }
+#map .lbl text { font-size: 10px; font-weight: 600; fill: var(--muted); letter-spacing: .03em; }
+#map .lbl.water text { fill: var(--water); stroke: var(--bg); font-style: italic; font-size: 12px; }
+#map .mk .name { display: none; }
+#map.labels .mk .name, #map .mk.stop .name, #map .mk.sel .name { display: inline; }
+#map .mk.dim { opacity: .35; }
+#map .mk.sel circle { stroke: var(--ink); stroke-width: 3px; }
+.mapbar { position: absolute; top: 10px; left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+.mapbar > * { pointer-events: auto; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+.mapbtns { position: absolute; right: max(10px, env(safe-area-inset-right, 0px)); bottom: 14px; display: grid; gap: 6px; }
+.mapbtns button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; font-size: 22px; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.15); padding: 0; }
+.mapbtns svg { width: 20px; height: 20px; }
+.mapcard { position: absolute; left: max(10px, env(safe-area-inset-left, 0px)); right: 64px; bottom: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.mapcard .t { font-weight: 800; font-size: 15.5px; }
+.mapnote { position: absolute; left: max(10px, env(safe-area-inset-left, 0px)); bottom: 14px; font-size: 11px; color: var(--muted); background: var(--surface); padding: 3px 7px; border-radius: 6px; opacity: .9; }
+
+/* Info */
+.info { display: grid; gap: 18px; max-width: 720px; }
+.info section { display: grid; gap: 8px; }
+.info p, .info ul { margin: 0; }
+.info ul { padding-left: 18px; display: grid; gap: 4px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; }
+.kv dt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.kv dd { margin: 0; color: var(--muted); }
+.trip { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 3px; text-decoration: none; color: var(--ink); }
+.trip b { display: flex; justify-content: space-between; gap: 8px; }
+.trip span { font-size: 13.5px; color: var(--muted); }
+.hotelpick { display: grid; gap: 8px; }
+.hotelpick label { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; }
+.hotelpick input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); }
+.hotelpick small { display: block; color: var(--muted); }
+
+.toast { position: fixed; left: 0; right: 0; margin-inline: auto; width: fit-content; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); z-index: 40; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 12px; display: flex; gap: 14px; align-items: center; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+.toast span { min-width: 0; }
+.toast button { flex: none; background: none; border: 0; color: var(--toast-act); font-weight: 800; padding: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet:not([hidden]) { animation: up .18s ease-out; }
+  @keyframes up { from { transform: translateY(16px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+@media (min-width: 760px) {
+  .list { grid-template-columns: 1fr 1fr; }
+  .view.gutter, .sheet-body { padding-left: max(24px, calc((100% - 900px) / 2)); padding-right: max(24px, calc((100% - 900px) / 2)); }
+}
+</style>
+
+<header class="top gutter">
+  <div class="brand">
+    <h1>Dublín de bolsillo</h1>
+    <small id="sub">Jue 5 – Sáb 7 de noviembre</small>
+  </div>
+  <span class="netpill" id="net">Sin conexión</span>
+</header>
+
+<main id="main">
+  <section class="view gutter" id="view-explore" aria-label="Explorar">
+    <div id="hotel-banner"></div>
+    <div class="explore-tools">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar: castillo, pinta, gratis, lluvia…" autocomplete="off" enterkeyhint="search">
+        <button class="clear" id="q-clear" aria-label="Borrar búsqueda" hidden>×</button>
+      </div>
+      <div class="chips" id="cats"></div>
+      <div class="refline">
+        <span>Distancias desde</span>
+        <select id="ref" aria-label="Medir distancias desde">
+          <option value="hotel">el hotel</option>
+          <option value="gps">mi posición (GPS)</option>
+          <option value="last">la última parada del plan</option>
+        </select>
+        <span>Ordenar</span>
+        <select id="sort" aria-label="Ordenar">
+          <option value="rel">por interés</option>
+          <option value="near">por cercanía</option>
+        </select>
+      </div>
+    </div>
+    <ul class="list" id="list"></ul>
+  </section>
+
+  <section class="view" id="view-map" aria-label="Mapa" hidden>
+    <svg id="map" role="img" aria-label="Mapa esquemático del centro de Dublín"></svg>
+    <div class="mapbar">
+      <div class="seg" id="mapmode" style="grid-auto-columns:auto"></div>
+    </div>
+    <div class="mapnote" id="mapnote">Mapa esquemático · sin escala exacta de calles</div>
+    <div class="mapcard" id="mapcard" hidden></div>
+    <div class="mapbtns">
+      <button id="zin" aria-label="Acercar">+</button>
+      <button id="zout" aria-label="Alejar">−</button>
+      <button id="zhotel" aria-label="Centrar en el hotel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9H3z"/><path d="M10 20v-5h4v5"/></svg></button>
+      <button id="zgps" aria-label="Mi posición"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+    </div>
+  </section>
+
+  <section class="view gutter" id="view-plan" aria-label="Plan" hidden></section>
+  <section class="view gutter" id="view-info" aria-label="Info" hidden></section>
+</main>
+
+<nav class="tabs" id="tabs" aria-label="Secciones">
+  <button data-tab="explore" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Explorar</button>
+  <button data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Mapa</button>
+  <button data-tab="plan" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>Plan</button>
+  <button data-tab="info" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
+</nav>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="d-title">
+  <div class="sheet-head gutter">
+    <button class="x" id="sheet-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg></button>
+    <span class="label" id="sheet-label"></span>
+  </div>
+  <div class="sheet-body gutter" id="sheet-body"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Trip data. Hours are approximate November (winter) hours: always check before going.
+// h: { all | jue | vie | sab : [open, close] | false (closed that day) }, null = street/always open.
+const CIV = 'https://www.civitatis.com/es/dublin/';
+
+const HOTELS = {
+  christchurch: { name: 'Leonardo Christchurch', addr: 'Christchurch Place, Dublin 8 (D08 REK7)', lat: 53.3428, lon: -6.2706 },
+  parnell: { name: 'Leonardo Parnell Street', addr: 'Moore Street Plaza, Parnell St, Dublin 1 (D01 E0H3)', lat: 53.3518, lon: -6.2634 }
+};
+
+const DAYS = {
+  jue: { label: 'Jueves 5', short: 'Jue', start: '12:30', note: 'Llegada al hotel sobre las 11–12 h. Comida, paseo y cena por el centro.' },
+  vie: { label: 'Viernes 6 · noche', short: 'Vie', start: '19:30', note: 'Excursión de día completo. Aquí solo la cena y algo de música al volver.' },
+  sab: { label: 'Sábado 7 · mañana', short: 'Sáb', start: '09:30', limit: '13:15', note: 'Vuelo sobre las 16:00: comed pronto y salid hacia el aeropuerto como tarde a las 13:15–13:30.' }
+};
+
+const SUNSET = '16:50';
+const SUNRISE = '07:37';
+
+const CATS = {
+  ver: { n: 'Monumentos', one: 'Monumento' },
+  museo: { n: 'Museos y visitas', one: 'Museo o visita' },
+  calle: { n: 'Calles y plazas', one: 'Calle o plaza' },
+  parque: { n: 'Parques', one: 'Parque' },
+  comer: { n: 'Comer y cenar', one: 'Para comer' },
+  pub: { n: 'Pubs y música', one: 'Pub' }
+};
+
+const PLACES = [
+  // ---------- South of the Liffey: Trinity / Grafton / Georgian Dublin ----------
+  { id: 'trinity', n: 'Trinity College y Libro de Kells', c: 'museo', d: 'D02', lat: 53.3440, lon: -6.2565, dur: 75,
+    t: 'La universidad más antigua de Irlanda (1592). El campus se pasea gratis. Con entrada veis el Libro de Kells, un evangeliario iluminado por monjes hacia el año 800, la Long Room de la Old Library y una sala inmersiva sobre el manuscrito.',
+    tip: 'Reservad hora en la web oficial, las franjas se agotan. La Old Library está en un programa de conservación y la Long Room puede no verse como en las fotos clásicas. Si solo queréis el ambiente, entrad gratis por la puerta de College Green y cruzad los patios.',
+    ht: 'Aprox. 9:30–17:00, última entrada antes del cierre.', h: { all: ['09:30', '17:00'] }, p: '≈ 21–28 €',
+    l: [['Entradas oficiales', 'https://www.visittrinity.ie/'], ['Civitatis: Trinity, Kells y Castillo (79 €)', CIV + 'trinity-college-libro-kells-castillo-dublin/']],
+    k: 'book of kells biblioteca universidad long room old library' },
+  { id: 'grafton', n: 'Grafton Street', c: 'calle', d: 'D02', lat: 53.3417, lon: -6.2601, dur: 30, out: true, free: true,
+    t: 'La calle peatonal comercial del sur, entre Trinity y St Stephen\'s Green. Músicos callejeros a todas horas, tiendas y el histórico Bewley\'s Café con vidrieras de Harry Clarke.',
+    tip: 'Al final, por Wicklow Street y Duke Street, hay pubs clásicos (Davy Byrne\'s, Kehoe\'s) para un descanso.',
+    ht: 'Calle: siempre. Tiendas aprox. 9:30–19:00 (jueves hasta 20:00).', h: null, p: 'Gratis',
+    l: [], k: 'compras tiendas shopping busker musica calle' },
+  { id: 'molly', n: 'Estatua de Molly Malone', c: 'ver', d: 'D02', lat: 53.3437, lon: -6.2612, dur: 5, out: true, free: true,
+    t: 'La pescadera de la canción popular "Cockles and Mussels", convertida en símbolo no oficial de la ciudad. Está en Suffolk Street, junto a la oficina de turismo.',
+    tip: 'Siempre hay cola para la foto. Mejor de pasada camino de Grafton Street.',
+    ht: 'Siempre.', h: null, p: 'Gratis', l: [], k: 'estatua cancion foto' },
+  { id: 'stephens', n: 'St Stephen\'s Green', c: 'parque', d: 'D02', lat: 53.3382, lon: -6.2591, dur: 25, out: true, free: true,
+    t: 'Parque victoriano de 9 hectáreas con estanque, puentes y patos. Por su borde norte pasa la historia de la ciudad: el hotel Shelbourne, donde se redactó la Constitución irlandesa, y el arco de los Fusileros.',
+    tip: 'En noviembre cierra al anochecer, sobre las 16:45–17:00. Si queréis verlo con luz, ponedlo antes de esa hora en la ruta.',
+    ht: 'Aprox. 7:30 (dom 9:30) hasta el anochecer.', h: { all: ['07:30', '16:45'] }, p: 'Gratis', l: [['OPW St Stephen\'s Green', 'https://www.ststephensgreenpark.ie/']], k: 'parque verde jardin patos shelbourne' },
+  { id: 'iveagh', n: 'Iveagh Gardens', c: 'parque', d: 'D02', lat: 53.3353, lon: -6.2617, dur: 20, out: true, free: true,
+    t: 'El jardín "secreto" de Dublín, detrás de las calles de St Stephen\'s Green: cascada de piedra, laberinto de boj y estatuas. Mucho más tranquilo que el Green.',
+    tip: 'Entrada por Clonmel Street o Earlsfort Terrace. Cierra al anochecer.',
+    ht: 'Aprox. 8:00 (dom 10:00) hasta el anochecer.', h: { all: ['08:00', '16:45'] }, p: 'Gratis', l: [], k: 'jardin secreto laberinto cascada' },
+  { id: 'little', n: 'Little Museum of Dublin', c: 'museo', d: 'D02', lat: 53.3393, lon: -6.2578, dur: 60,
+    t: 'Una casa georgiana frente al Green llena de objetos donados por los dublineses: la historia del siglo XX de la ciudad contada con humor en visitas guiadas cortas. Tiene una sala dedicada a U2.',
+    tip: 'Se entra en visita guiada con hora: reservad online si podéis. Muy buen plan si llueve.',
+    ht: 'Aprox. 9:30–17:00.', h: { all: ['09:30', '17:00'] }, p: '≈ 15–18 €',
+    l: [['Web oficial', 'https://www.littlemuseum.ie/']], k: 'museo pequeño u2 historia siglo xx' },
+  { id: 'merrion', n: 'Merrion Square y Oscar Wilde', c: 'parque', d: 'D02', lat: 53.3401, lon: -6.2495, dur: 25, out: true, free: true,
+    t: 'La plaza georgiana más elegante: casas de ladrillo con las famosas puertas de colores y montantes en abanico. En la esquina noroeste está la estatua de Oscar Wilde, que vivió en el número 1.',
+    tip: 'Para ver puertas georgianas, rodead la plaza por Merrion Square East y bajad por Fitzwilliam Street. El parque cierra al anochecer, las calles no.',
+    ht: 'Parque aprox. 10:00 hasta el anochecer. Calles siempre.', h: null, p: 'Gratis', l: [], k: 'puertas georgianas colores oscar wilde estatua plaza' },
+  { id: 'natgallery', n: 'National Gallery of Ireland', c: 'museo', d: 'D02', lat: 53.3408, lon: -6.2526, dur: 60, free: true,
+    t: 'La pinacoteca nacional, gratuita. Destacan "El prendimiento de Cristo" de Caravaggio, Vermeer, Velázquez y la sala de Jack B. Yeats.',
+    tip: 'Los jueves suele abrir hasta las 20:30: perfecto para la tarde del jueves cuando ya es de noche.',
+    ht: 'Aprox. lun–sáb 9:15–17:30, jueves hasta 20:30, dom 11:00–17:30.', h: { all: ['09:15', '17:30'], jue: ['09:15', '20:30'] }, p: 'Gratis',
+    l: [['Web oficial', 'https://www.nationalgallery.ie/']], k: 'pintura arte caravaggio galeria cuadros lluvia gratis' },
+  { id: 'archaeology', n: 'Museo Nacional de Arqueología', c: 'museo', d: 'D02', lat: 53.3405, lon: -6.2547, dur: 60, free: true,
+    t: 'En Kildare Street. El oro de la Edad del Bronce, tesoros vikingos y medievales y los impresionantes "cuerpos del pantano", conservados más de 2.000 años en la turba.',
+    tip: 'Gratis y a cubierto. El edificio victoriano con la rotonda ya merece la pena.',
+    ht: 'Aprox. mar–sáb 10:00–17:00, dom–lun 13:00–17:00.', h: { all: ['10:00', '17:00'] }, p: 'Gratis',
+    l: [['Web oficial', 'https://www.museum.ie/en-IE/Museums/Archaeology']], k: 'arqueologia oro vikingos cuerpos pantano bog bodies lluvia gratis' },
+  { id: 'naturalhistory', n: 'Museo de Historia Natural', c: 'museo', d: 'D02', lat: 53.3399, lon: -6.2531, dur: 40, free: true,
+    t: 'El "Dead Zoo": un gabinete victoriano casi intacto desde 1857, con vitrinas de madera, esqueletos de alce irlandés gigante y animales disecados de todo el mundo.',
+    tip: 'Visita corta y curiosa, gratis. Está junto a la National Gallery.',
+    ht: 'Aprox. mar–sáb 10:00–17:00, dom–lun 13:00–17:00.', h: { all: ['10:00', '17:00'] }, p: 'Gratis',
+    l: [['Web oficial', 'https://www.museum.ie/en-IE/Museums/Natural-History']], k: 'dead zoo animales alce victoriano lluvia gratis' },
+  { id: 'whiskeymuseum', n: 'Irish Whiskey Museum', c: 'museo', d: 'D02', lat: 53.3441, lon: -6.2598, dur: 60,
+    t: 'Frente a Trinity. Visita guiada amena sobre la historia del whiskey irlandés que termina con cata de tres o cuatro whiskeys.',
+    tip: 'Alternativa céntrica a las destilerías si no queréis desplazaros.',
+    ht: 'Aprox. 10:00–18:00, visitas cada media hora.', h: { all: ['10:00', '18:00'] }, p: '≈ 25 €',
+    l: [['Web oficial', 'https://www.irishwhiskeymuseum.ie/'], ['Civitatis (desde 25 €)', CIV + 'entrada-museo-whiskey-irlandes/']], k: 'whisky whiskey cata' },
+  { id: 'wax', n: 'National Wax Museum', c: 'museo', d: 'D02', lat: 53.3462, lon: -6.2594, dur: 60,
+    t: 'Museo de cera con personajes de la historia y la cultura irlandesa, desde los líderes de 1916 hasta músicos actuales. Divertido con lluvia.',
+    tip: 'En Westmoreland Street, entre Trinity y el puente O\'Connell.',
+    ht: 'Aprox. 10:00–19:00.', h: { all: ['10:00', '19:00'] }, p: '≈ 19 €',
+    l: [['Civitatis (desde 19 €)', CIV + 'entrada-museo-cera-dublin/']], k: 'cera figuras lluvia niños' },
+
+  // ---------- Temple Bar / Dame St / Castle ----------
+  { id: 'templebar', n: 'Barrio de Temple Bar', c: 'calle', d: 'D02', lat: 53.3455, lon: -6.2642, dur: 40, out: true, free: true,
+    t: 'Callejones empedrados entre Dame Street y el río, llenos de pubs con música en directo, galerías y tiendas. Es el barrio más turístico y también el más animado de noche.',
+    tip: 'Las pintas aquí cuestan bastante más (8–10 €). Para tomar algo más tranquilo y barato, salid a las calles de alrededor.',
+    ht: 'Siempre. Música en los pubs desde media tarde.', h: null, p: 'Gratis', l: [['Civitatis: tour de pubs (16 €)', CIV + 'tour-dublin-noche/']], k: 'pubs noche musica fiesta empedrado' },
+  { id: 'hapenny', n: 'Ha\'penny Bridge', c: 'ver', d: 'D01', lat: 53.3463, lon: -6.2631, dur: 10, out: true, free: true,
+    t: 'El puente peatonal de hierro fundido de 1816, icono de la ciudad. Su nombre viene del medio penique de peaje que se cobraba para cruzarlo. Une Temple Bar con la orilla norte.',
+    tip: 'La mejor foto, desde el puente siguiente (O\'Connell o Millennium), y al anochecer con las farolas encendidas.',
+    ht: 'Siempre.', h: null, p: 'Gratis', l: [], k: 'puente rio liffey foto' },
+  { id: 'castle', n: 'Castillo de Dublín', c: 'ver', d: 'D02', lat: 53.3429, lon: -6.2675, dur: 60,
+    t: 'Sede del poder británico en Irlanda durante 700 años, hoy edificio de Estado. Se visitan los salones de gala (State Apartments) y, con guía, las excavaciones vikingas bajo la torre.',
+    tip: 'El patio y los jardines son gratis. La visita guiada incluye la parte medieval subterránea y merece la pena si hay plazas.',
+    ht: 'Aprox. 9:45–17:15, última entrada 16:45.', h: { all: ['09:45', '17:15'] }, p: '≈ 8 € libre / 12 € guiada',
+    l: [['Web oficial', 'https://www.dublincastle.ie/'], ['Civitatis: Trinity, Kells y Castillo (79 €)', CIV + 'trinity-college-libro-kells-castillo-dublin/']], k: 'castillo state apartments vikingo torre' },
+  { id: 'chester', n: 'Chester Beatty', c: 'museo', d: 'D02', lat: 53.3423, lon: -6.2670, dur: 50, free: true,
+    t: 'Dentro de los jardines del Castillo. Colección de manuscritos, libros iluminados y arte de Asia, Oriente Medio y Europa: coranes, papiros bíblicos, grabados japoneses. Gratis y de primer nivel.',
+    tip: 'El café del museo es bueno y tranquilo. En invierno cierra los lunes, pero jueves y sábado abre.',
+    ht: 'Aprox. mar–sáb 10:00–17:00, dom 12:00–17:00.', h: { all: ['10:00', '17:00'] }, p: 'Gratis',
+    l: [['Web oficial', 'https://chesterbeatty.ie/']], k: 'manuscritos biblioteca arte asia lluvia gratis' },
+  { id: 'cityhall', n: 'Ayuntamiento (City Hall)', c: 'ver', d: 'D02', lat: 53.3440, lon: -6.2669, dur: 15, free: true,
+    t: 'Edificio georgiano de 1779 con una rotonda de columnas y frescos que se puede ver gratis. Está al lado de la entrada del Castillo.',
+    tip: 'Entrad aunque sea cinco minutos: la rotonda es espectacular.',
+    ht: 'Aprox. lun–sáb 10:00–17:15.', h: { all: ['10:00', '17:15'] }, p: 'Gratis', l: [], k: 'ayuntamiento rotonda georgiano' },
+  { id: 'powerscourt', n: 'Powerscourt Townhouse', c: 'calle', d: 'D02', lat: 53.3421, lon: -6.2624, dur: 20, free: true,
+    t: 'Mansión georgiana de 1774 convertida en galería comercial con patio cubierto: tiendas de diseño, anticuarios y cafés. Buen refugio si llueve.',
+    tip: 'Arriba está el café The Pepper Pot, muy popular para desayunar o merendar.',
+    ht: 'Aprox. 10:00–18:00 (jueves hasta 20:00).', h: { all: ['10:00', '18:00'], jue: ['10:00', '20:00'] }, p: 'Gratis', l: [], k: 'compras galeria cafe lluvia' },
+  { id: 'georgesarcade', n: 'George\'s Street Arcade', c: 'calle', d: 'D02', lat: 53.3428, lon: -6.2637, dur: 20, free: true,
+    t: 'Mercado cubierto victoriano de ladrillo rojo (1881): puestos de vinilos, libros, ropa vintage y comida para llevar.',
+    tip: 'Buen sitio para picar algo barato de pie.',
+    ht: 'Aprox. 10:00–18:30 (dom desde 12:00).', h: { all: ['10:00', '18:30'] }, p: 'Gratis', l: [], k: 'mercado vintage vinilos comida barata lluvia' },
+  { id: 'whitefriar', n: 'Iglesia de Whitefriar Street', c: 'ver', d: 'D02', lat: 53.3405, lon: -6.2654, dur: 10, free: true,
+    t: 'Iglesia carmelita que guarda reliquias de San Valentín, traídas de Roma en 1836. Hay también una Virgen medieval de madera, la única que sobrevivió a la Reforma.',
+    tip: 'Visita rápida y curiosa cerca de George\'s Street.',
+    ht: 'Aprox. 8:00–18:00.', h: { all: ['08:00', '18:00'] }, p: 'Gratis', l: [], k: 'san valentin iglesia reliquias' },
+
+  // ---------- Medieval Dublin / Liberties ----------
+  { id: 'christchurch', n: 'Catedral de Christ Church', c: 'ver', d: 'D08', lat: 53.3434, lon: -6.2710, dur: 45,
+    t: 'La catedral más antigua de Dublín, fundada hacia 1030 por un rey vikingo. Tiene una cripta enorme del siglo XII con la tumba de Strongbow y el famoso gato y la rata momificados.',
+    tip: 'Si estáis en el Leonardo Christchurch la tenéis enfrente: buena primera parada. Hay entrada combinada con Dublinia, unida por un puente cubierto.',
+    ht: 'Aprox. lun–sáb 9:30–17:00, dom desde 12:30. Puede cerrar por oficios.', h: { all: ['09:30', '17:00'] }, p: '≈ 11,50 €',
+    l: [['Web oficial', 'https://christchurchcathedral.ie/'], ['Civitatis: entrada (11,50 €)', CIV + 'entrada-catedral-christ-church/']], k: 'catedral cripta vikingos gato rata momia strongbow' },
+  { id: 'dublinia', n: 'Dublinia', c: 'museo', d: 'D08', lat: 53.3431, lon: -6.2719, dur: 70,
+    t: 'Museo interactivo sobre el Dublín vikingo y medieval: calles reconstruidas, barco vikingo y una torre con vistas de la ciudad. Unido a Christ Church por un puente.',
+    tip: 'Más entretenido que profundo. Ideal si llueve o si os gustan los vikingos.',
+    ht: 'Aprox. 10:00–17:30, última entrada 16:30.', h: { all: ['10:00', '17:30'] }, p: '≈ 16 €',
+    l: [['Web oficial', 'https://www.dublinia.ie/']], k: 'vikingos medieval museo interactivo lluvia' },
+  { id: 'staudoens', n: 'St Audoen\'s y la muralla', c: 'ver', d: 'D08', lat: 53.3436, lon: -6.2741, dur: 15, out: true, free: true,
+    t: 'La iglesia medieval más antigua aún en uso de Dublín y, detrás, la única puerta de la muralla de la ciudad que sigue en pie (St Audoen\'s Arch, 1240).',
+    tip: 'Bajad por las escaleras del arco hacia el río: es uno de los rincones medievales más auténticos.',
+    ht: 'Exterior siempre. Iglesia con horario reducido en invierno.', h: null, p: 'Gratis', l: [], k: 'muralla medieval arco iglesia' },
+  { id: 'stpatricks', n: 'Catedral de San Patricio', c: 'ver', d: 'D08', lat: 53.3395, lon: -6.2715, dur: 45,
+    t: 'La catedral nacional de Irlanda, la iglesia más grande del país, levantada junto al pozo donde según la tradición San Patricio bautizaba. Jonathan Swift, autor de "Los viajes de Gulliver", fue su deán y está enterrado aquí.',
+    tip: 'El sábado abre temprano: buena visita para la última mañana. El parque de al lado es bonito y gratuito.',
+    ht: 'Aprox. lun–sáb 9:30–17:00, dom horario reducido.', h: { all: ['09:30', '17:00'] }, p: '≈ 10 €',
+    l: [['Web oficial', 'https://www.stpatrickscathedral.ie/'], ['Civitatis: catedral + Biblioteca Marsh (35 €)', CIV + 'catedral-san-patricio-biblioteca-marsh/']], k: 'catedral san patricio swift gulliver' },
+  { id: 'marsh', n: 'Biblioteca Marsh', c: 'museo', d: 'D08', lat: 53.3393, lon: -6.2706, dur: 25,
+    t: 'La primera biblioteca pública de Irlanda (1707), casi intacta: estanterías de roble oscuro y las "jaulas" donde se encerraba a los lectores con los libros más valiosos.',
+    tip: 'Pequeña y muy auténtica. Está pegada a San Patricio.',
+    ht: 'Aprox. mar–sáb 9:30–17:00. Cerrada dom–lun.', h: { all: ['09:30', '17:00'] }, p: '≈ 7 €',
+    l: [['Web oficial', 'https://www.marshlibrary.ie/'], ['Civitatis: catedral + Biblioteca Marsh (35 €)', CIV + 'catedral-san-patricio-biblioteca-marsh/']], k: 'biblioteca libros antigua jaulas' },
+  { id: 'guinness', n: 'Guinness Storehouse', c: 'museo', d: 'D08', lat: 53.3419, lon: -6.2867, dur: 120,
+    t: 'El edificio de fermentación de la fábrica de St James\'s Gate convertido en una experiencia de siete plantas sobre la cerveza negra. Termina con una pinta en el Gravity Bar, con vistas de 360° de la ciudad.',
+    tip: 'Comprad online: es más barato y hay franjas horarias. Las primeras de la mañana son más económicas y tranquilas. Desde Christ Church son unos 15–20 min a pie por Thomas Street.',
+    ht: 'Aprox. 9:30–19:00, última entrada sobre las 17:00.', h: { all: ['09:30', '19:00'] }, p: '≈ 26–40 €',
+    l: [['Web oficial', 'https://www.guinness-storehouse.com/'], ['Civitatis: entradas (40 €)', CIV + 'entrada-guinness-storehouse/'], ['Civitatis: visita guiada + Guinness (desde 54 €)', CIV + 'visita-guiada-dublin-entrada-guinness-storehouse/']], k: 'cerveza pinta gravity bar fabrica guinness' },
+  { id: 'teeling', n: 'Destilería Teeling', c: 'museo', d: 'D08', lat: 53.3375, lon: -6.2768, dur: 60,
+    t: 'La primera destilería que abrió en Dublín en 125 años (2015), en el barrio de The Liberties. Visita del proceso en funcionamiento y cata.',
+    tip: 'Combina bien con San Patricio y la Guinness: está a medio camino.',
+    ht: 'Aprox. 10:00–17:40.', h: { all: ['10:00', '17:40'] }, p: '≈ 22–30 €',
+    l: [['Web oficial', 'https://teelingwhiskey.com/'], ['Civitatis (desde 22 €)', CIV + 'visita-destileria-teeling/']], k: 'whiskey whisky destileria cata liberties' },
+  { id: 'kilmainham', n: 'Cárcel de Kilmainham', c: 'museo', d: 'D08', lat: 53.3419, lon: -6.3095, dur: 75,
+    t: 'Prisión de 1796 donde fueron encarcelados y ejecutados los líderes del Alzamiento de Pascua de 1916. Es la visita más emotiva para entender la independencia irlandesa. Solo con visita guiada.',
+    tip: 'Está a unos 3,5 km de Temple Bar: mejor bus (13, 40, 69, 79) o taxi. Hay que reservar online con días de antelación porque se agota.',
+    ht: 'Aprox. 9:30–17:30, solo visitas guiadas con reserva.', h: { all: ['09:30', '17:30'] }, p: '≈ 8 €',
+    l: [['Reservas (OPW)', 'https://kilmainhamgaolmuseum.ie/']], k: 'carcel prision 1916 independencia historia' },
+  { id: 'imma', n: 'IMMA · Royal Hospital Kilmainham', c: 'museo', d: 'D08', lat: 53.3429, lon: -6.3001, dur: 45, free: true,
+    t: 'Museo de arte moderno en un hospital para soldados de 1684, con jardines formales de estilo francés. Gratis.',
+    tip: 'Combinadlo con Kilmainham Gaol, que está a 5 minutos.',
+    ht: 'Aprox. mar–sáb 10:00–17:30, dom desde 12:00.', h: { all: ['10:00', '17:30'] }, p: 'Gratis',
+    l: [['Web oficial', 'https://imma.ie/']], k: 'arte moderno jardines gratis' },
+
+  // ---------- North side ----------
+  { id: 'oconnell', n: 'O\'Connell Street y The Spire', c: 'calle', d: 'D01', lat: 53.3498, lon: -6.2603, dur: 25, out: true, free: true,
+    t: 'La avenida principal, ancha y monumental, con la estatua de Daniel O\'Connell junto al puente y The Spire, una aguja de acero de 120 metros (2003) donde antes estuvo la columna de Nelson.',
+    tip: 'Mirad las columnas de la fachada de la Oficina de Correos (GPO): conservan los impactos de bala de 1916.',
+    ht: 'Siempre.', h: null, p: 'Gratis', l: [['Civitatis: free tour (gratis)', CIV + 'visita-guiada-dublin/']], k: 'avenida spire aguja estatua calle principal' },
+  { id: 'gpo', n: 'GPO Witness History', c: 'museo', d: 'D01', lat: 53.3492, lon: -6.2607, dur: 75,
+    t: 'Museo dentro de la Oficina Central de Correos, cuartel general de los rebeldes en el Alzamiento de 1916. Cuenta la semana del levantamiento de forma muy visual.',
+    tip: 'Buena alternativa a Kilmainham si no os da tiempo a desplazaros. Abre a las 10:00, ideal para el sábado.',
+    ht: 'Aprox. lun–sáb 10:00–17:30.', h: { all: ['10:00', '17:30'] }, p: '≈ 16 €',
+    l: [['Web oficial', 'https://www.gpowitnesshistory.ie/']], k: 'correos 1916 historia independencia lluvia' },
+  { id: 'henry', n: 'Henry Street y Moore Street', c: 'calle', d: 'D01', lat: 53.3495, lon: -6.2628, dur: 30, out: true, free: true,
+    t: 'La calle comercial del norte, peatonal, con los grandes almacenes Arnotts. En Moore Street sobrevive el mercado callejero de fruta y flores.',
+    tip: 'Más local y barata que Grafton Street.',
+    ht: 'Tiendas aprox. 9:00–19:00 (jueves hasta 21:00).', h: null, p: 'Gratis', l: [], k: 'compras mercado tiendas arnotts' },
+  { id: 'remembrance', n: 'Jardín del Recuerdo', c: 'parque', d: 'D01', lat: 53.3540, lon: -6.2643, dur: 15, out: true, free: true,
+    t: 'Jardín en Parnell Square dedicado a quienes murieron por la libertad de Irlanda, con un estanque en forma de cruz y la escultura de los Hijos de Lir.',
+    tip: 'Al lado de la Hugh Lane Gallery.',
+    ht: 'Aprox. 8:30 hasta el anochecer.', h: { all: ['08:30', '16:45'] }, p: 'Gratis', l: [], k: 'jardin memorial hijos de lir' },
+  { id: 'hughlane', n: 'Hugh Lane Gallery', c: 'museo', d: 'D01', lat: 53.3543, lon: -6.2648, dur: 45, free: true,
+    t: 'Galería municipal de arte moderno, gratuita. Tiene reconstruido, pieza a pieza, el caótico estudio de Londres del pintor dublinés Francis Bacon.',
+    tip: 'Cerca del hotel si estáis en Parnell Street.',
+    ht: 'Aprox. mar–jue 9:45–18:00, vie 9:45–17:00, sáb 10:00–17:00, dom 11:00–17:00.', h: { all: ['10:00', '17:00'], jue: ['09:45', '18:00'] }, p: 'Gratis',
+    l: [['Web oficial', 'https://www.hughlane.ie/']], k: 'arte moderno francis bacon galeria gratis' },
+  { id: 'henrietta', n: '14 Henrietta Street', c: 'museo', d: 'D01', lat: 53.3532, lon: -6.2718, dur: 75,
+    t: 'Una casa georgiana que pasó de mansión aristocrática a vivienda abarrotada donde llegaron a vivir 100 personas. Cuenta 300 años de vida dublinesa. Muy recomendado.',
+    tip: 'Solo con visita guiada y plazas limitadas: reservad. Suele abrir de miércoles a domingo.',
+    ht: 'Aprox. mié–dom 10:00–16:00 (visitas guiadas).', h: { all: ['10:00', '16:00'] }, p: '≈ 10 €',
+    l: [['Web oficial', 'https://14henriettastreet.ie/']], k: 'casa georgiana tenement historia social' },
+  { id: 'jameson', n: 'Destilería Jameson (Bow St)', c: 'museo', d: 'D07', lat: 53.3483, lon: -6.2773, dur: 60,
+    t: 'La antigua destilería de Jameson en Smithfield, donde se elaboró whiskey hasta 1971. Visita guiada con cata comparativa.',
+    tip: 'La plaza de Smithfield tiene buen ambiente y cerca está la iglesia de St Michan\'s con sus momias.',
+    ht: 'Aprox. 10:00–18:00 (visitas cada pocos minutos).', h: { all: ['10:00', '18:00'] }, p: '≈ 26 €',
+    l: [['Web oficial', 'https://www.jamesonwhiskey.com/en-ie/visit-us/jameson-distillery-bow-st/'], ['Civitatis: Guinness + Jameson (138 €)', CIV + 'tour-guinness-storehouse-destileria-jameson/']], k: 'whiskey whisky destileria cata smithfield' },
+  { id: 'stmichans', n: 'Momias de St Michan\'s', c: 'ver', d: 'D07', lat: 53.3471, lon: -6.2768, dur: 30,
+    t: 'Iglesia del siglo XVII cuya cripta de piedra caliza conserva, momificados de forma natural, cuerpos de hace siglos. Se dice que Bram Stoker la visitó de niño.',
+    tip: 'Visitas guiadas cortas con horario limitado (mañana y primera tarde). Comprobad horario el mismo día.',
+    ht: 'Aprox. lun–vie 10:00–12:30 y 14:00–16:30, sáb 10:00–12:45.', h: { all: ['10:00', '16:30'], sab: ['10:00', '12:45'] }, p: '≈ 8 €',
+    l: [], k: 'momias cripta dracula macabro' },
+  { id: 'fourcourts', n: 'Four Courts', c: 'ver', d: 'D07', lat: 53.3459, lon: -6.2737, dur: 5, out: true, free: true,
+    t: 'El tribunal supremo, con su gran cúpula sobre el río. Escenario del inicio de la Guerra Civil en 1922.',
+    tip: 'Se ve desde el muelle sur, frente a la iglesia de Adam & Eve. No hace falta entrar.',
+    ht: 'Exterior siempre.', h: null, p: 'Gratis', l: [], k: 'tribunal cupula rio' },
+  { id: 'leprechaun', n: 'Museo del Leprechaun', c: 'museo', d: 'D01', lat: 53.3478, lon: -6.2664, dur: 50,
+    t: 'Recorrido guiado y teatral por los mitos y cuentos de hadas irlandeses. Más espectáculo que museo.',
+    tip: 'Divertido con lluvia. Hay versión nocturna para adultos algunos días.',
+    ht: 'Aprox. 10:00–18:00.', h: { all: ['10:00', '18:00'] }, p: '≈ 18–20 €',
+    l: [['Web oficial', 'https://www.leprechaunmuseum.ie/']], k: 'mitos leyendas hadas cuentos lluvia' },
+  { id: 'boat', n: 'Paseo en barco por el Liffey', c: 'ver', d: 'D01', lat: 53.3469, lon: -6.2603, dur: 45,
+    t: 'Barco cubierto que recorre el río hacia los Docklands con explicaciones de la historia de la ciudad. Sale de Bachelor\'s Walk, junto al puente O\'Connell.',
+    tip: 'Cancelan si el río va muy alto o hace mucho viento. Mejor reservar.',
+    ht: 'Salidas varias al día, aprox. 10:30–16:00.', h: { all: ['10:30', '16:00'] }, p: '≈ 21 €',
+    l: [['Civitatis (21 €)', CIV + 'paseo-barco-dublin/']], k: 'barco crucero rio liffey' },
+
+  // ---------- Docklands ----------
+  { id: 'custom', n: 'Custom House', c: 'ver', d: 'D01', lat: 53.3486, lon: -6.2533, dur: 10, out: true, free: true,
+    t: 'La antigua aduana (1791), quizá el edificio georgiano más bello de Dublín, con su cúpula verde reflejada en el río.',
+    tip: 'Se ve mejor desde la otra orilla, en el muelle de George\'s Quay.',
+    ht: 'Exterior siempre.', h: null, p: 'Gratis', l: [], k: 'aduana cupula georgiano rio' },
+  { id: 'famine', n: 'Memorial de la Hambruna', c: 'ver', d: 'D01', lat: 53.3480, lon: -6.2485, dur: 10, out: true, free: true,
+    t: 'Esculturas de bronce de figuras famélicas caminando hacia los barcos, en recuerdo de la Gran Hambruna de 1845–1849, que mató a un millón de personas y obligó a emigrar a otro millón.',
+    tip: 'Está justo al lado de EPIC y del barco Jeanie Johnston: juntadlos.',
+    ht: 'Siempre.', h: null, p: 'Gratis', l: [], k: 'hambruna esculturas famine estatuas' },
+  { id: 'epic', n: 'EPIC, Museo de la Emigración', c: 'museo', d: 'D01', lat: 53.3486, lon: -6.2480, dur: 90,
+    t: 'Museo interactivo y muy moderno sobre los 10 millones de irlandeses que emigraron y su influencia en el mundo. En las bóvedas de ladrillo de CHQ.',
+    tip: 'Muy bien valorado y a cubierto. Calculad hora y media larga.',
+    ht: 'Aprox. 10:00–18:45, última entrada 17:00.', h: { all: ['10:00', '18:45'] }, p: '≈ 22–25 €',
+    l: [['Web oficial', 'https://epicchq.com/'], ['Civitatis (desde 22 €)', CIV + 'entrada-epic/']], k: 'emigracion museo interactivo lluvia' },
+  { id: 'jeanie', n: 'Barco Jeanie Johnston', c: 'museo', d: 'D01', lat: 53.3474, lon: -6.2474, dur: 50,
+    t: 'Réplica de un velero que llevó emigrantes de la hambruna a América sin perder a ningún pasajero. Visita guiada a bordo.',
+    tip: 'Solo con visita guiada a horas fijas.',
+    ht: 'Aprox. 10:00–16:00, visitas a horas fijas.', h: { all: ['10:00', '16:00'] }, p: '≈ 16 €',
+    l: [['Civitatis (desde 16 €)', CIV + 'tour-jeanie-johnston/']], k: 'barco velero hambruna emigrantes' },
+  { id: 'beckett', n: 'Puente Samuel Beckett', c: 'ver', d: 'D02', lat: 53.3469, lon: -6.2412, dur: 15, out: true, free: true,
+    t: 'Puente de Calatrava con forma de arpa tumbada, símbolo del Dublín moderno de los Docklands, rodeado de oficinas de tecnológicas.',
+    tip: 'Bonito al atardecer y de noche, cuando se ilumina.',
+    ht: 'Siempre.', h: null, p: 'Gratis', l: [], k: 'puente calatrava arpa docklands moderno' },
+
+  // ---------- Further out ----------
+  { id: 'phoenix', n: 'Phoenix Park', c: 'parque', d: 'D08', lat: 53.3484, lon: -6.3026, dur: 60, out: true, free: true,
+    t: 'Uno de los parques urbanos cerrados más grandes de Europa (700 ha), con ciervos en libertad, el zoo y la residencia del presidente. El obelisco de Wellington está cerca de la entrada sureste.',
+    tip: 'Los ciervos suelen estar en la zona de Fifteen Acres, lejos de la entrada. Es un plan de varias horas: solo si os sobra tiempo y hay luz.',
+    ht: 'Siempre (de día).', h: { all: ['07:00', '16:45'] }, p: 'Gratis', l: [['Web oficial', 'https://phoenixpark.ie/']], k: 'parque ciervos zoo grande' },
+  { id: 'glasnevin', n: 'Cementerio de Glasnevin', c: 'museo', d: 'D11', lat: 53.3720, lon: -6.2775, dur: 90,
+    t: 'El cementerio nacional, con las tumbas de Daniel O\'Connell, Michael Collins y muchas figuras de la historia irlandesa. Las visitas guiadas son de las mejores de la ciudad.',
+    tip: 'A unos 3 km del centro: bus o taxi. Al lado está el pub Gravediggers, con una de las mejores pintas de Dublín.',
+    ht: 'Museo aprox. 10:00–17:00.', h: { all: ['10:00', '17:00'] }, p: '≈ 15–20 € con guía',
+    l: [['Web oficial', 'https://www.glasnevintrust.ie/']], k: 'cementerio collins historia tumbas' },
+
+  // ---------- Food ----------
+  { id: 'leoburdock', n: 'Leo Burdock', c: 'comer', d: 'D08', lat: 53.3423, lon: -6.2702, dur: 30, meal: 'Comida o cena', pr: '€',
+    t: 'El fish & chips más famoso de Dublín, desde 1913, a la vuelta de Christ Church. Solo para llevar.',
+    tip: 'Comedlo en los bancos del parque de Christ Church o de San Patricio si no llueve.',
+    ht: 'Aprox. 11:00–23:00.', h: { all: ['11:00', '23:00'] }, p: '≈ 12–15 €', l: [], k: 'fish and chips pescado frito barato llevar' },
+  { id: 'queenoftarts', n: 'Queen of Tarts', c: 'comer', d: 'D02', lat: 53.3446, lon: -6.2689, dur: 50, meal: 'Desayuno o comida', pr: '€',
+    t: 'Cafetería pequeña y acogedora en Cow\'s Lane famosa por sus tartas caseras, sopas y desayunos irlandeses.',
+    tip: 'Suele haber cola a mediodía. Para la comida del jueves, cerca de Christ Church.',
+    ht: 'Aprox. 8:00–18:00.', h: { all: ['08:00', '18:00'] }, p: '≈ 12–20 €', l: [], k: 'cafe tartas brunch desayuno sopa' },
+  { id: 'bewleys', n: 'Bewley\'s Grafton Street', c: 'comer', d: 'D02', lat: 53.3419, lon: -6.2599, dur: 45, meal: 'Desayuno, comida o merienda', pr: '€€',
+    t: 'El café histórico de Dublín (1927), con vidrieras de Harry Clarke. Desayunos, platos sencillos y su bollo "sticky bun".',
+    tip: 'Más por el sitio que por la comida. Bueno para un café con scone a media tarde.',
+    ht: 'Aprox. 8:00–18:00.', h: { all: ['08:00', '18:00'] }, p: '≈ 15–25 €', l: [], k: 'cafe historico scone desayuno vidrieras' },
+  { id: 'woollenmills', n: 'The Woollen Mills', c: 'comer', d: 'D01', lat: 53.3465, lon: -6.2638, dur: 70, meal: 'Comida o cena', pr: '€€',
+    t: 'Cocina irlandesa moderna junto al Ha\'penny Bridge, en un edificio donde trabajó James Joyce. Estofado irlandés, fish & chips y terraza en la azotea.',
+    tip: 'Reservad para cenar. Buena opción para la cena del jueves o del viernes.',
+    ht: 'Aprox. 8:00–22:00.', h: { all: ['08:00', '22:00'] }, p: '≈ 25–40 €', l: [], k: 'irlandes estofado irish stew restaurante cena' },
+  { id: 'gallaghers', n: 'Gallagher\'s Boxty House', c: 'comer', d: 'D02', lat: 53.3452, lon: -6.2625, dur: 70, meal: 'Comida o cena', pr: '€€',
+    t: 'Especialistas en boxty, la tortita de patata tradicional irlandesa, rellena de carne, pescado o verduras. También Irish stew. Ambiente rústico en plena Temple Bar.',
+    tip: 'Típico y fiable. Reservad para cenar.',
+    ht: 'Aprox. 12:00–22:00.', h: { all: ['12:00', '22:00'] }, p: '≈ 25–40 €', l: [], k: 'boxty patata tradicional irlandes cena irish stew' },
+  { id: 'oneills', n: 'O\'Neill\'s (Suffolk St)', c: 'comer', d: 'D02', lat: 53.3436, lon: -6.2605, dur: 60, meal: 'Comida o cena', pr: '€€',
+    t: 'Pub victoriano enorme, con varios salones, famoso por su "carvery": asado del día con patatas y verduras servido al momento. Música tradicional por la noche.',
+    tip: 'Comida abundante y rápida a buen precio para ser el centro.',
+    ht: 'Aprox. 10:30–23:30, carvery hasta media tarde.', h: { all: ['10:30', '23:30'] }, p: '≈ 15–25 €', l: [], k: 'pub carvery asado tradicional musica' },
+  { id: 'klaw', n: 'Klaw', c: 'comer', d: 'D02', lat: 53.3451, lon: -6.2634, dur: 50, meal: 'Comida o cena', pr: '€€',
+    t: 'Barra pequeña de marisco en Crown Alley: ostras irlandesas, langosta y rollos de cangrejo.',
+    tip: 'Hay "hora feliz" de ostras algunas tardes. Local muy pequeño.',
+    ht: 'Aprox. 12:00–22:00.', h: { all: ['12:00', '22:00'] }, p: '≈ 25–45 €', l: [], k: 'marisco ostras pescado langosta' },
+  { id: 'fallonbyrne', n: 'Fallon & Byrne', c: 'comer', d: 'D02', lat: 53.3431, lon: -6.2635, dur: 60, meal: 'Comida o cena', pr: '€€',
+    t: 'Tienda gourmet con restaurante arriba y bodega de vinos en el sótano, en Exchequer Street. Productos irlandeses de calidad.',
+    tip: 'La bodega del sótano es buena para cenar algo informal con vino.',
+    ht: 'Aprox. 9:00–21:00.', h: { all: ['09:00', '21:00'] }, p: '≈ 20–40 €', l: [], k: 'gourmet vino tienda restaurante' },
+  { id: 'avoca', n: 'Avoca (Suffolk St)', c: 'comer', d: 'D02', lat: 53.3434, lon: -6.2608, dur: 50, meal: 'Desayuno o comida', pr: '€€',
+    t: 'Tienda de diseño irlandés con café-restaurante arriba: ensaladas, quiches, scones y tartas caseras.',
+    tip: 'Ideal para una comida ligera junto a Grafton Street. La tienda es buena para regalos.',
+    ht: 'Aprox. 9:30–18:00.', h: { all: ['09:30', '18:00'] }, p: '≈ 15–25 €', l: [], k: 'cafe ensaladas scones regalos tienda' },
+  { id: 'thebank', n: 'The Bank on College Green', c: 'comer', d: 'D02', lat: 53.3444, lon: -6.2613, dur: 60, meal: 'Comida o cena', pr: '€€',
+    t: 'Pub-restaurante dentro de un banco victoriano con techo de vidrieras y mosaicos. Comida de pub cuidada.',
+    tip: 'Merece la pena entrar aunque sea a tomar algo.',
+    ht: 'Aprox. 11:00–23:30.', h: { all: ['11:00', '23:30'] }, p: '≈ 20–35 €', l: [], k: 'pub banco victoriano comida' },
+  { id: 'thechurch', n: 'The Church', c: 'comer', d: 'D01', lat: 53.3484, lon: -6.2667, dur: 60, meal: 'Comida o cena', pr: '€€',
+    t: 'Bar-restaurante dentro de una iglesia del siglo XVIII en Mary Street, con el órgano original. A menudo hay música irlandesa y baile por la noche.',
+    tip: 'Más espectacular por el sitio que por la carta. Bien situado en el norte, cerca de Henry Street.',
+    ht: 'Aprox. 11:00–23:30.', h: { all: ['11:00', '23:30'] }, p: '≈ 20–35 €', l: [], k: 'iglesia bar restaurante musica baile' },
+  { id: 'winding', n: 'The Winding Stair', c: 'comer', d: 'D01', lat: 53.3465, lon: -6.2630, dur: 80, meal: 'Comida o cena', pr: '€€€',
+    t: 'Restaurante sobre una librería antigua con ventanales al Ha\'penny Bridge. Cocina irlandesa de producto: pescado, cordero, quesos irlandeses.',
+    tip: 'La cena "especial" del viaje. Reservad.',
+    ht: 'Aprox. 12:00–22:00.', h: { all: ['12:00', '22:00'] }, p: '≈ 40–60 €', l: [], k: 'restaurante irlandes libreria vistas cena especial' },
+  { id: 'brotherhubbard', n: 'Brother Hubbard', c: 'comer', d: 'D01', lat: 53.3479, lon: -6.2697, dur: 60, meal: 'Desayuno o comida', pr: '€€',
+    t: 'Brunch muy popular en Capel Street, con influencia de Oriente Medio. Buen café.',
+    tip: 'Solo de día. Para el desayuno o la comida temprana del sábado.',
+    ht: 'Aprox. 8:00–16:30.', h: { all: ['08:00', '16:30'] }, p: '≈ 15–25 €', l: [], k: 'brunch desayuno cafe' },
+  { id: 'beshoff', n: 'Beshoff Bros (O\'Connell St)', c: 'comer', d: 'D01', lat: 53.3486, lon: -6.2597, dur: 30, meal: 'Comida o cena', pr: '€',
+    t: 'Fish & chips con mesas, al lado de O\'Connell Street. Rápido y sin complicaciones.',
+    tip: 'Bueno para una comida rápida el sábado antes de ir al aeropuerto: el Aircoach sale de O\'Connell Street.',
+    ht: 'Aprox. 11:00–22:00.', h: { all: ['11:00', '22:00'] }, p: '≈ 12–18 €', l: [], k: 'fish and chips pescado rapido barato' },
+  { id: 'murphys', n: 'Murphy\'s Ice Cream', c: 'comer', d: 'D02', lat: 53.3430, lon: -6.2611, dur: 15, meal: 'Postre', pr: '€',
+    t: 'Helados artesanos de Kerry con sabores irlandeses: sal marina, Guinness, whiskey, pan moreno.',
+    tip: 'Probad el de sal marina o el de "brown bread".',
+    ht: 'Aprox. 11:00–22:00.', h: { all: ['11:00', '22:00'] }, p: '≈ 5 €', l: [], k: 'helado postre dulce' },
+  { id: 'foodmarket', n: 'Mercado de Temple Bar', c: 'comer', d: 'D02', lat: 53.3448, lon: -6.2654, dur: 40, meal: 'Comida (solo sábado)', pr: '€',
+    t: 'Mercado de comida al aire libre en Meeting House Square, cubierto con paraguas gigantes: ostras, quesos irlandeses, crepes y comida callejera.',
+    tip: 'Solo los sábados por la mañana y primera hora de la tarde. Perfecto para comer pronto el sábado.',
+    ht: 'Sábados aprox. 10:00–16:00.', h: { all: false, sab: ['10:00', '16:00'] }, p: '≈ 10–20 €', l: [], k: 'mercado sabado comida callejera ostras quesos' },
+  { id: 'pepperpot', n: 'The Pepper Pot', c: 'comer', d: 'D02', lat: 53.3421, lon: -6.2622, dur: 40, meal: 'Desayuno o comida', pr: '€',
+    t: 'Café casero en la galería alta de Powerscourt: panes, sopas, scones y tartas.',
+    tip: 'Solo de día y se llena: id temprano.',
+    ht: 'Aprox. 10:00–17:00.', h: { all: ['10:00', '17:00'] }, p: '≈ 10–18 €', l: [], k: 'cafe desayuno scones tarta' },
+  { id: 'marys', n: 'Mary\'s Bar & Hardware', c: 'comer', d: 'D02', lat: 53.3427, lon: -6.2615, dur: 50, meal: 'Comida o cena', pr: '€',
+    t: 'Pub mitad ferretería antigua en Wicklow Street. Toasties, sopas y música en directo en el sótano.',
+    tip: 'Pequeño y con mucho encanto. Para comer algo sencillo con una pinta.',
+    ht: 'Aprox. 12:00–23:30.', h: { all: ['12:00', '23:30'] }, p: '≈ 10–20 €', l: [], k: 'pub toastie ferreteria musica' },
+
+  // ---------- Pubs & live music ----------
+  { id: 'brazenhead', n: 'The Brazen Head', c: 'pub', d: 'D08', lat: 53.3448, lon: -6.2764, dur: 90, meal: 'Cena con música', pr: '€€',
+    t: 'Presume de ser el pub más antiguo de Irlanda (1198). Patio, salas de techos bajos, comida de pub y música tradicional todas las noches.',
+    tip: 'A 5 minutos del Leonardo Christchurch. Hay una cena con cuentos y música ("Food, Folklore & Fairies") que se reserva aparte.',
+    ht: 'Aprox. 10:30–23:30, música desde las 21:30.', h: { all: ['10:30', '23:30'] }, p: '≈ 20–30 €', l: [['Web oficial', 'https://www.brazenhead.com/']], k: 'pub antiguo musica tradicional cena irlandesa' },
+  { id: 'oldstorehouse', n: 'The Old Storehouse', c: 'pub', d: 'D02', lat: 53.3453, lon: -6.2649, dur: 90, meal: 'Cena con música', pr: '€€',
+    t: 'Pub-restaurante en Temple Bar con música en directo de día y de noche. Cocina irlandesa abundante.',
+    tip: 'Buena opción para cenar y quedarse a la música sin cambiar de sitio.',
+    ht: 'Aprox. 11:00–23:30.', h: { all: ['11:00', '23:30'] }, p: '≈ 20–35 €', l: [], k: 'pub musica en directo cena temple bar' },
+  { id: 'thetemplebar', n: 'The Temple Bar (pub)', c: 'pub', d: 'D02', lat: 53.3455, lon: -6.2641, dur: 45, pr: '€€',
+    t: 'El pub rojo más fotografiado de Dublín, con música tradicional casi a cualquier hora y una enorme colección de whiskeys.',
+    tip: 'Muy turístico y caro. Id a por la foto y una pinta, no a cenar.',
+    ht: 'Aprox. 10:30–1:00.', h: { all: ['10:30', '23:59'] }, p: '≈ 9–10 € la pinta', l: [], k: 'pub rojo famoso musica foto' },
+  { id: 'stagshead', n: 'The Stag\'s Head', c: 'pub', d: 'D02', lat: 53.3434, lon: -6.2643, dur: 45, pr: '€',
+    t: 'Pub victoriano de 1870 casi intacto: madera, espejos, vidrieras y la cabeza de ciervo que le da nombre. Uno de los más bonitos de la ciudad.',
+    tip: 'Escondido en Dame Court. Más auténtico y barato que Temple Bar.',
+    ht: 'Aprox. 12:00–23:30.', h: { all: ['12:00', '23:30'] }, p: '≈ 7 € la pinta', l: [], k: 'pub victoriano bonito autentico' },
+  { id: 'mulligans', n: 'Mulligan\'s', c: 'pub', d: 'D02', lat: 53.3466, lon: -6.2558, dur: 40, pr: '€',
+    t: 'Pub de 1782 en Poolbeg Street con fama de servir una de las mejores pintas de Guinness de Dublín. JFK bebió aquí de joven.',
+    tip: 'Sin música ni comida: pinta y conversación, como antes.',
+    ht: 'Aprox. 12:00–23:30.', h: { all: ['12:00', '23:30'] }, p: '≈ 6,50 € la pinta', l: [], k: 'pub guinness pinta autentico' },
+  { id: 'kehoes', n: 'Kehoe\'s', c: 'pub', d: 'D02', lat: 53.3410, lon: -6.2593, dur: 40, pr: '€',
+    t: 'Pub victoriano en South Anne Street con reservados de madera ("snugs"). Muy dublinés.',
+    tip: 'A un paso de Grafton Street.',
+    ht: 'Aprox. 12:00–23:30.', h: { all: ['12:00', '23:30'] }, p: '≈ 7 € la pinta', l: [], k: 'pub victoriano snug' },
+  { id: 'davybyrnes', n: 'Davy Byrne\'s', c: 'pub', d: 'D02', lat: 53.3415, lon: -6.2595, dur: 50, meal: 'Comida o cena', pr: '€€',
+    t: 'El "pub moral" del Ulises de Joyce, donde Leopold Bloom pide un sándwich de gorgonzola y un vaso de borgoña. Sirve comida y marisco.',
+    tip: 'Si os gusta la literatura, pedid el sándwich de gorgonzola.',
+    ht: 'Aprox. 11:00–23:30.', h: { all: ['11:00', '23:30'] }, p: '≈ 20–30 €', l: [], k: 'pub joyce ulises literatura' },
+  { id: 'darkeykellys', n: 'Darkey Kelly\'s', c: 'pub', d: 'D08', lat: 53.3451, lon: -6.2697, dur: 60, pr: '€€',
+    t: 'Pub en Fishamble Street con música tradicional en directo todas las noches, menos turístico que Temple Bar.',
+    tip: 'Cerca del Leonardo Christchurch. La música empieza sobre las 19:00–21:00.',
+    ht: 'Aprox. 12:00–23:30.', h: { all: ['12:00', '23:30'] }, p: '≈ 7 € la pinta', l: [], k: 'pub musica tradicional en directo' },
+  { id: 'toners', n: 'Toners', c: 'pub', d: 'D02', lat: 53.3376, lon: -6.2518, dur: 40, pr: '€',
+    t: 'Pub de 1818 en Baggot Street con aspecto de tienda de ultramarinos antigua. Se dice que es el único pub en el que entró el poeta W. B. Yeats.',
+    tip: 'Buena parada después de Merrion Square.',
+    ht: 'Aprox. 12:00–23:30.', h: { all: ['12:00', '23:30'] }, p: '≈ 7 € la pinta', l: [], k: 'pub yeats antiguo' }
+];
+
+const TRIPS = [
+  { n: 'Acantilados de Moher y Galway', p: '99 €', u: CIV + 'excursion-acantilados-moher/', t: 'La más popular. Unos 12–13 h con muchas horas de bus. Acantilados de 200 m sobre el Atlántico y paseo por Galway.' },
+  { n: 'Belfast, Calzada del Gigante y castillo de Dunluce', p: '99 €', u: CIV + 'belfast-calzada-gigante-castillo-dunluce/', t: 'Columnas de basalto en la costa de Irlanda del Norte. Llevad pasaporte o DNI: se cruza a Reino Unido.' },
+  { n: 'Wicklow y Glendalough', p: '59 €', u: CIV + 'excursion-wicklow/', t: 'Montañas, lagos y el monasterio de Glendalough. Más corta (unas 8 h): volveríais a tiempo de cenar con calma.' },
+  { n: 'Kilkenny', p: '59 €', u: CIV + 'excursion-kilkenny/', t: 'Ciudad medieval con castillo y catedral.' },
+  { n: 'Howth y Malahide', p: '59 €', u: CIV + 'excursion-howth-malahide/', t: 'Pueblo pesquero con acantilados y castillo de Malahide, cerca de Dublín.' },
+  { n: 'Estudios de Juego de Tronos', p: '≈ 62 €', u: CIV + 'excursion-estudios-juegos-tronos/', t: 'Los estudios de rodaje en Irlanda del Norte. Llevad documentación.' }
+];
+
+// Ready-made routes the user can load and then rearrange.
+const TEMPLATES = {
+  jue: [
+    { n: 'Clásico del sur', d: 'Catedral, comida, Trinity, Grafton y el Green con luz, National Gallery (abre hasta tarde el jueves) y cena con música en Temple Bar.',
+      s: [['christchurch', 40], ['queenoftarts', 50], ['trinity', 75], ['grafton', 25], ['stephens', 25], ['natgallery', 60], ['templebar', 40], ['hapenny', 10], ['oldstorehouse', 90]] },
+    { n: 'Guinness y el Dublín medieval', d: 'Empezad por la Guinness (con comida dentro) y volved por San Patricio, el Chester Beatty y Temple Bar.',
+      s: [['guinness', 150], ['stpatricks', 40], ['chester', 40], ['templebar', 45], ['brazenhead', 90]] },
+    { n: 'Museos gratis si llueve', d: 'Todo a cubierto y casi todo gratis, con la National Gallery abierta hasta tarde el jueves.',
+      s: [['chester', 50], ['thebank', 60], ['archaeology', 60], ['naturalhistory', 30], ['natgallery', 75], ['powerscourt', 20], ['gallaghers', 70]] }
+  ],
+  vie: [
+    { n: 'Cena irlandesa y música', d: 'Cena tradicional y luego pub con música en directo.', s: [['gallaghers', 70], ['thetemplebar', 40], ['stagshead', 40]] },
+    { n: 'Cerca del hotel (Christchurch)', d: 'Pocos pasos después de un día largo de excursión.', s: [['brazenhead', 120]] }
+  ],
+  sab: [
+    { n: 'Norte del Liffey', d: 'Ha\'penny Bridge, O\'Connell Street, el museo del GPO y comida rápida cerca del bus al aeropuerto.',
+      s: [['hapenny', 10], ['oconnell', 20], ['gpo', 75], ['henry', 25], ['beshoff', 35]] },
+    { n: 'Catedrales y mercado', d: 'San Patricio a primera hora, Marsh y el mercado de comida de Temple Bar para comer.',
+      s: [['stpatricks', 45], ['marsh', 25], ['christchurch', 40], ['foodmarket', 45]] },
+    { n: 'Lo que faltó de Trinity', d: 'Si el jueves no dio tiempo: Trinity a primera hora, Grafton y comida.',
+      s: [['trinity', 75], ['molly', 5], ['grafton', 25], ['avoca', 50]] }
+  ]
+};
+
+</script>
+<script>
+'use strict';
+const PWA = true;
+const KEY = 'dublin-bolsillo-v1';
+const BYID = Object.fromEntries(PLACES.map(p => [p.id, p]));
+const DAYKEYS = ['jue', 'vie', 'sab'];
+const TRIP_DATES = { '2026-11-05': 'jue', '2026-11-06': 'vie', '2026-11-07': 'sab' };
+const TAB_HASH = { explore: 'explorar', map: 'mapa', plan: 'plan', info: 'info' };
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const catVar = c => `var(--c-${c})`;
+
+const IC = {
+  walk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M7 12l2-4 4-1 3 4 3 1M11 15l1-5"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  shuffle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>'
+};
+
+// ---------- State ----------
+function defState() {
+  const days = {};
+  for (const k of DAYKEYS) days[k] = { start: DAYS[k].start, from: 'hotel', back: true, limit: DAYS[k].limit || '', stops: [], notes: '' };
+  return { hotel: null, day: 'jue', days, cat: 'all', ref: 'hotel', sort: 'rel', mapMode: 'all', tab: 'explore' };
+}
+function load() {
+  const d = defState();
+  try {
+    const o = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (o && typeof o === 'object') {
+      const days = {};
+      for (const k of DAYKEYS) days[k] = { ...d.days[k], ...((o.days || {})[k] || {}) };
+      return { ...d, ...o, days };
+    }
+  } catch (e) { /* storage unavailable */ }
+  return d;
+}
+let S = load();
+let saveT;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 120); }
+
+let undoSnap = null;
+function snapshot() { undoSnap = JSON.stringify(S.days); }
+function restore() { if (!undoSnap) return; S.days = JSON.parse(undoSnap); undoSnap = null; save(); renderAll(); }
+
+// ---------- Geo & time ----------
+let GPS = null;
+const hotel = () => HOTELS[S.hotel || 'christchurch'];
+const hotelPt = () => ({ lat: hotel().lat, lon: hotel().lon, n: 'Hotel ' + hotel().name });
+function dist(a, b) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLa = (b.lat - a.lat) * r, dLo = (b.lon - a.lon) * r;
+  const x = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+// Straight-line distance × 1.25 for real streets, at ~4.7 km/h.
+const walkMin = m => Math.max(1, Math.round(m * 1.25 / 78));
+const fmtDist = m => m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`;
+const fmtMin = n => n < 60 ? `${n} min` : `${Math.floor(n / 60)} h${n % 60 ? ' ' + (n % 60) : ''}`;
+const toMin = s => { const m = /^(\d{1,2}):(\d{2})/.exec(s || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const fromMin = n => { n = ((Math.round(n) % 1440) + 1440) % 1440; return `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`; };
+const gpsInDublin = () => GPS && dist(GPS, hotelPt()) < 30000;
+
+function startPt(dk) {
+  if (S.days[dk].from === 'gps' && gpsInDublin()) return { lat: GPS.lat, lon: GPS.lon, n: 'Tu posición' };
+  return hotelPt();
+}
+function refLabel() {
+  if (S.ref === 'gps' && gpsInDublin()) return 'ti';
+  const st = S.days[S.day].stops, p = S.ref === 'last' && st.length && BYID[st[st.length - 1].id];
+  return p ? p.n : 'el hotel';
+}
+function refPt() {
+  if (S.ref === 'gps' && gpsInDublin()) return { lat: GPS.lat, lon: GPS.lon, n: 'tu posición' };
+  if (S.ref === 'last') {
+    const st = S.days[S.day].stops;
+    const p = st.length && BYID[st[st.length - 1].id];
+    if (p) return p;
+  }
+  return hotelPt();
+}
+
+// ---------- Opening hours ----------
+function hoursOn(p, dk) {
+  if (!p.h) return null;
+  if (dk && dk in p.h) return p.h[dk];
+  return 'all' in p.h ? p.h.all : null;
+}
+function statusAt(p, dk, arr, dep) {
+  const h = hoursOn(p, dk);
+  if (h === null || h === undefined) return p.out && arr >= toMin(SUNSET) ? { cls: 'neutral', txt: 'ya de noche' } : null;
+  if (h === false) return { cls: 'bad', txt: 'cerrado ese día' };
+  const o = toMin(h[0]), c = toMin(h[1]);
+  if (arr >= c) return { cls: 'bad', txt: `cerrado, cierra ${h[1]}` };
+  if (arr < o) return { cls: 'warn', txt: `abre a las ${h[0]}` };
+  if (dep > c) return { cls: 'warn', txt: `cierra a las ${h[1]}` };
+  return { cls: 'good', txt: `abierto hasta ${h[1]}` };
+}
+function todayKey() {
+  const d = new Date();
+  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return TRIP_DATES[iso] || null;
+}
+function hoursLabel(p) {
+  const dk = todayKey();
+  const h = hoursOn(p, dk || S.day);
+  if (h === null || h === undefined) return null;
+  if (h === false) return { cls: 'bad', txt: dk ? 'cerrado hoy' : `cerrado el ${DAYS[S.day].short.toLowerCase()}` };
+  if (!dk) return { cls: 'neutral', txt: `${h[0]}–${h[1]}` };
+  const d = new Date(), now = d.getHours() * 60 + d.getMinutes();
+  const o = toMin(h[0]), c = toMin(h[1]);
+  if (now < o) return { cls: 'warn', txt: `abre ${h[0]}` };
+  if (now >= c) return { cls: 'bad', txt: 'cerrado ya' };
+  if (c - now <= 45) return { cls: 'warn', txt: `cierra ${h[1]}` };
+  return { cls: 'good', txt: `abierto · cierra ${h[1]}` };
+}
+
+// ---------- Plan logic ----------
+function computeDay(dk) {
+  const d = S.days[dk];
+  const start = startPt(dk);
+  const startT = toMin(d.start) ?? toMin(DAYS[dk].start);
+  let t = startT, prev = start, walkTot = 0, mTot = 0;
+  const rows = [];
+  d.stops.forEach((s, i) => {
+    const p = BYID[s.id];
+    if (!p) return;
+    const m = dist(prev, p), w = walkMin(m);
+    t += w; walkTot += w; mTot += m;
+    const arr = t, dep = t + s.dur;
+    rows.push({ i, s, p, m, w, arr, dep, st: statusAt(p, dk, arr, dep) });
+    t = dep; prev = p;
+  });
+  let back = null;
+  if (d.back && rows.length) {
+    const m = dist(prev, hotelPt()), w = walkMin(m);
+    back = { m, w, arr: t + w };
+    walkTot += w; mTot += m; t += w;
+  }
+  return { start, startT, rows, back, end: t, walkTot, mTot };
+}
+function planHits(id) {
+  const out = [];
+  for (const k of DAYKEYS) { const i = S.days[k].stops.findIndex(s => s.id === id); if (i >= 0) out.push([k, i + 1]); }
+  return out;
+}
+function toggleStop(id, dk) {
+  const d = S.days[dk], p = BYID[id];
+  const idx = d.stops.findIndex(s => s.id === id);
+  snapshot();
+  if (idx >= 0) { d.stops.splice(idx, 1); toast(`Quitado del ${DAYS[dk].label.split(' ·')[0].toLowerCase()}`, 'Deshacer', restore); }
+  else { d.stops.push({ id, dur: p.dur }); toast(`Añadido al ${DAYS[dk].label.split(' ·')[0].toLowerCase()} · parada ${d.stops.length}`, 'Deshacer', restore); }
+  save(); renderAll();
+}
+// Meals (anything with a meal slot) and visited stops stay where they are; the sights between them are
+// reordered to minimise walking, with penalties for arriving when a place is closed or it is already dark.
+const isMeal = s => !!BYID[s.id].meal;
+function dayCost(dk, stops) {
+  const d = S.days[dk];
+  let t = toMin(d.start) ?? toMin(DAYS[dk].start), prev = startPt(dk), c = 0;
+  for (const s of stops) {
+    const p = BYID[s.id], m = dist(prev, p);
+    c += m; t += walkMin(m);
+    const st = s.done ? null : statusAt(p, dk, t, t + s.dur);
+    if (st) c += { bad: 5000, warn: 800, neutral: 400 }[st.cls] || 0;
+    t += s.dur; prev = p;
+  }
+  return d.back ? c + dist(prev, hotelPt()) : c;
+}
+function optimize(dk) {
+  const d = S.days[dk];
+  const list = d.stops.filter(s => BYID[s.id]);
+  const movable = list.map(s => !s.done && !isMeal(s));
+  if (movable.filter(Boolean).length < 2) { toast('Hacen falta al menos dos visitas pendientes para ordenar'); return; }
+  const segs = [];
+  for (let i = 0; i < list.length; i++) if (movable[i]) { let j = i; while (j + 1 < list.length && movable[j + 1]) j++; if (j > i) segs.push([i, j]); i = j; }
+  // Seed: nearest neighbour inside each segment, kept only if it beats the current order.
+  const seed = list.slice();
+  for (const [a, b] of segs) {
+    let cur = a > 0 ? BYID[seed[a - 1].id] : startPt(dk);
+    const rest = seed.slice(a, b + 1);
+    for (let k = a; k <= b; k++) {
+      let bi = 0, bd = Infinity;
+      rest.forEach((s, i) => { const dd = dist(cur, BYID[s.id]); if (dd < bd) { bd = dd; bi = i; } });
+      seed[k] = rest.splice(bi, 1)[0]; cur = BYID[seed[k].id];
+    }
+  }
+  let cur = dayCost(dk, seed) < dayCost(dk, list) ? seed : list.slice();
+  let best = dayCost(dk, cur), improved = true, guard = 0;
+  const tryIt = cand => { const c = dayCost(dk, cand); if (c < best - 1) { cur = cand; best = c; improved = true; } };
+  while (improved && guard++ < 200) {
+    improved = false;
+    for (const [a, b] of segs) for (let i = a; i < b; i++) for (let j = i + 1; j <= b; j++) {
+      tryIt(cur.slice(0, i).concat(cur.slice(i, j + 1).reverse(), cur.slice(j + 1)));
+      const c2 = cur.slice(); c2.splice(j, 0, c2.splice(i, 1)[0]); tryIt(c2);
+      const c3 = cur.slice(); c3.splice(i, 0, c3.splice(j, 1)[0]); tryIt(c3);
+    }
+  }
+  snapshot();
+  d.stops = cur;
+  save(); renderAll();
+  toast('Orden optimizado por distancia y horarios. Comidas y cenas no se mueven.', 'Deshacer', restore);
+}
+function loadTemplate(dk, ti, append) {
+  const tpl = TEMPLATES[dk][ti];
+  snapshot();
+  const d = S.days[dk];
+  const fresh = tpl.s.filter(([id]) => BYID[id]).map(([id, dur]) => ({ id, dur }));
+  d.stops = append ? d.stops.concat(fresh.filter(f => !d.stops.some(s => s.id === f.id))) : fresh;
+  save(); renderAll();
+  toast(append ? 'Ruta añadida al final' : `Ruta "${tpl.n}" cargada`, 'Deshacer', restore);
+}
+function gmapsRoute(dk) {
+  const c = computeDay(dk);
+  if (!c.rows.length) return null;
+  const f = p => `${p.lat.toFixed(5)},${p.lon.toFixed(5)}`;
+  const pts = c.rows.filter(r => !r.s.done).map(r => r.p);
+  if (!pts.length) return null;
+  const back = S.days[dk].back;
+  const dest = back ? hotelPt() : pts[pts.length - 1];
+  const way = (back ? pts : pts.slice(0, -1)).slice(0, 9);
+  let u = `https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=${f(GPS && gpsInDublin() ? GPS : c.start)}&destination=${f(dest)}`;
+  if (way.length) u += '&waypoints=' + encodeURIComponent(way.map(f).join('|'));
+  return u;
+}
+const gmapsPlace = p => `https://www.google.com/maps/search/?api=1&query=${p.lat.toFixed(5)},${p.lon.toFixed(5)}`;
+
+// ---------- UI helpers ----------
+let toastT;
+function toast(msg, act, fn) {
+  const t = $('#toast');
+  t.innerHTML = `<span>${esc(msg)}</span>` + (act ? `<button type="button">${esc(act)}</button>` : '');
+  t.hidden = false;
+  if (act) t.querySelector('button').onclick = () => { t.hidden = true; fn(); };
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { t.hidden = true; }, act ? 5500 : 2800);
+}
+const pill = st => st ? `<span class="pill ${st.cls}">${esc(st.txt)}</span>` : '';
+const daySeg = (act, cur, extra = '') => `<div class="seg" role="group" ${extra}>${DAYKEYS.map(k => `<button type="button" data-act="${act}" data-day="${k}" aria-pressed="${cur === k}">${DAYS[k].short}</button>`).join('')}</div>`;
+
+function hotelBanner() {
+  if (S.hotel) return '';
+  return `<div class="banner"><div><b>¿En qué Leonardo estáis?</b> Hay dos en el centro. Lo uso para calcular distancias y rutas.</div>
+    <div class="row">${Object.entries(HOTELS).map(([k, h]) => `<button class="btn small" data-act="hotel" data-id="${k}">${esc(h.name)}</button>`).join('')}</div></div>`;
+}
+
+// ---------- Explore ----------
+function searchText(p) {
+  return norm([p.k, CATS[p.c].n, p.d, p.meal, p.free ? 'gratis gratuito free' : '', p.out ? 'aire libre fuera' : 'lluvia cubierto dentro', p.pr].join(' '));
+}
+const WORD_FILTERS = { gratis: p => p.free, gratuito: p => p.free, free: p => p.free, lluvia: p => !p.out, llueve: p => !p.out, cubierto: p => !p.out };
+function score(p, q) {
+  if (!q) return 1;
+  const n = norm(p.n), k = searchText(p), body = norm(p.t + ' ' + p.tip);
+  let sc = 0;
+  for (const w of q.split(/\s+/).filter(Boolean)) {
+    if (WORD_FILTERS[w]) { if (!WORD_FILTERS[w](p)) return 0; sc += 1; continue; }
+    let s = 0;
+    if (n.startsWith(w)) s = 10; else if (n.includes(w)) s = 7; else if (k.includes(w)) s = 5; else if (body.includes(w)) s = 2;
+    if (!s) return 0;
+    sc += s;
+  }
+  return sc;
+}
+const FILTERS = [['all', 'Todo'], ['free', 'Gratis'], ['rain', 'Si llueve'], ...Object.entries(CATS).map(([k, v]) => [k, v.n])];
+function renderCats() {
+  $('#cats').innerHTML = FILTERS.map(([k, n]) => `<button class="chip" data-act="cat" data-id="${k}" aria-pressed="${S.cat === k}">${CATS[k] ? `<span class="dot" style="--c:${catVar(k)}"></span>` : ''}${esc(n)}</button>`).join('');
+}
+function renderList() {
+  const q = norm($('#q').value.trim());
+  $('#q-clear').hidden = !q;
+  const ref = refPt();
+  let items = PLACES.map((p, i) => ({ p, i, sc: score(p, q), m: dist(ref, p) })).filter(x => x.sc > 0);
+  if (S.cat === 'free') items = items.filter(x => x.p.free);
+  else if (S.cat === 'rain') items = items.filter(x => !x.p.out);
+  else if (S.cat !== 'all') items = items.filter(x => x.p.c === S.cat);
+  items.sort(S.sort === 'near' ? (a, b) => a.m - b.m : (a, b) => (b.sc - a.sc) || (a.i - b.i));
+  const dk = S.day;
+  $('#list').innerHTML = items.length ? items.map(({ p, m }) => {
+    const idx = S.days[dk].stops.findIndex(s => s.id === p.id);
+    const other = planHits(p.id).filter(([k]) => k !== dk).map(([k, n]) => `${DAYS[k].short} ${n}`).join(', ');
+    const meta = [`<span class="district">${p.d}</span>`, p.meal ? esc(p.meal) : fmtMin(p.dur), esc(p.pr && p.c === 'comer' ? p.pr : p.p)];
+    const hl = hoursLabel(p);
+    return `<li class="item" style="--c:${catVar(p.c)}"><span class="bar"></span>
+      <button class="item-main" data-act="open" data-id="${p.id}"><div class="item-name">${esc(p.n)}</div>
+      <div class="item-meta">${meta.join('<span aria-hidden="true">·</span>')} ${pill(hl)} ${other ? `<span class="pill neutral">En plan: ${other}</span>` : ''}</div></button>
+      <div class="item-side"><span class="walk">${walkMin(m)} min</span>
+      <button class="add ${idx >= 0 ? 'in' : ''}" data-act="add" data-id="${p.id}" aria-label="${idx >= 0 ? 'Quitar del' : 'Añadir al'} ${esc(DAYS[dk].label)}">${idx >= 0 ? `${DAYS[dk].short} ${idx + 1}` : '+'}</button></div></li>`;
+  }).join('') : `<li class="empty">Nada con "${esc($('#q').value)}". Prueba con otra palabra, por ejemplo "pub", "gratis" o "catedral".</li>`;
+}
+function renderExplore() {
+  $('#hotel-banner').innerHTML = hotelBanner();
+  $('#ref').value = S.ref; $('#sort').value = S.sort;
+  let dayline = $('#dayline');
+  if (!dayline) {
+    dayline = document.createElement('div');
+    dayline.id = 'dayline'; dayline.className = 'refline';
+    $('.explore-tools').appendChild(dayline);
+  }
+  dayline.innerHTML = `<span>El botón + añade al</span>${daySeg('day', S.day, 'style="grid-auto-columns:auto"')}`;
+  renderCats(); renderList();
+}
+
+// ---------- Detail sheet ----------
+let sheetPushed = false, sheetId = null;
+function nearList(p, food) {
+  return PLACES.filter(x => x.id !== p.id && (food ? (x.c === 'comer' || x.meal) : (x.c !== 'comer' && x.c !== 'pub')))
+    .map(x => ({ x, m: dist(p, x) })).sort((a, b) => a.m - b.m).slice(0, 4)
+    .map(({ x, m }) => `<button data-act="open" data-id="${x.id}"><span class="dot" style="--c:${catVar(x.c)}"></span><span class="n">${esc(x.n)}</span><span class="walk">${walkMin(m)} min</span></button>`).join('');
+}
+function renderSheet() {
+  const p = BYID[sheetId];
+  if (!p) return;
+  const ref = refPt(), m = dist(ref, p);
+  const hits = planHits(p.id);
+  $('#sheet-label').textContent = CATS[p.c].one;
+  $('#sheet-body').innerHTML = `
+    <div>
+      <div class="d-cat"><span class="dot" style="--c:${catVar(p.c)}"></span>${esc(CATS[p.c].one)} <span class="district">${p.d}</span>${p.meal ? ` · ${esc(p.meal)}` : ''}</div>
+      <h2 class="d-title" id="d-title">${esc(p.n)}</h2>
+    </div>
+    <div class="facts">
+      <div><span>Visita</span><b>${fmtMin(p.dur)}</b></div>
+      <div><span>Precio</span><b>${esc(p.p)}</b></div>
+      <div><span>A pie</span><b>${walkMin(m)} min</b><small class="muted">${fmtDist(m)} desde ${esc(refLabel())}</small></div>
+    </div>
+    <div class="row">${pill(hoursLabel(p))}<span class="muted" style="font-size:13.5px">${esc(p.ht)}</span></div>
+    <p class="prose">${esc(p.t)}</p>
+    <p class="prose tipbox">${esc(p.tip)}</p>
+    <div><div class="label" style="margin-bottom:6px">Añadir al plan</div>
+      <div class="addrow">${DAYKEYS.map(k => { const h = hits.find(([d]) => d === k); return `<button class="btn ${h ? 'in' : ''}" data-act="add" data-id="${p.id}" data-day="${k}">${h ? `✓ ${DAYS[k].short} · ${h[1]}` : `+ ${DAYS[k].short}`}</button>`; }).join('')}</div>
+    </div>
+    <div class="row">
+      <button class="btn" data-act="mapfocus" data-id="${p.id}">${IC.map}Ver en el mapa</button>
+      <a class="btn" href="${gmapsPlace(p)}" target="_blank" rel="noopener">${IC.ext}Google Maps</a>
+    </div>
+    ${p.l.length ? `<div class="links"><div class="label">Entradas e info (necesita internet)</div>${p.l.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener"><span>${esc(t)}</span><small>${esc(new URL(u).hostname.replace('www.', ''))} ↗</small></a>`).join('')}</div>` : ''}
+    <div class="near"><div class="label">Para comer o beber cerca</div>${nearList(p, true)}</div>
+    <div class="near"><div class="label">Para ver cerca</div>${nearList(p, false)}</div>`;
+}
+function openDetail(id) {
+  sheetId = id;
+  renderSheet();
+  const sh = $('#sheet');
+  if (sh.hidden) {
+    sh.hidden = false;
+    try { history.pushState({ sheet: 1 }, ''); sheetPushed = true; } catch (e) { sheetPushed = false; }
+  }
+  $('#sheet-body').scrollTop = 0;
+}
+function closeDetail(fromPop) {
+  if ($('#sheet').hidden) return;
+  $('#sheet').hidden = true; sheetId = null;
+  if (!fromPop && sheetPushed) { sheetPushed = false; try { history.back(); } catch (e) { /* ignore */ } }
+  sheetPushed = false;
+}
+window.addEventListener('popstate', () => closeDetail(true));
+
+// ---------- Plan view ----------
+function renderPlan() {
+  const dk = S.day, d = S.days[dk], c = computeDay(dk);
+  const sun = toMin(SUNSET);
+  let sunShown = c.startT >= sun;
+  const sunRow = arr => { if (sunShown || arr < sun) return ''; sunShown = true; return `<li class="tl-sun">Anochece sobre las ${SUNSET}: parques cerrados</li>`; };
+  const walkRow = (w, m) => `<li class="tl-walk">${IC.walk}<span>${w} min a pie · ${fmtDist(m)}</span>${w > 25 ? '<span class="far">lejos: mejor bus, Luas o taxi</span>' : ''}</li>`;
+  let tl = `<li class="tl-node"><span class="ic">${d.from === 'gps' && gpsInDublin() ? '•' : 'H'}</span><div><time>${fromMin(c.startT)}</time> · Salida desde <b>${esc(c.start.n)}</b></div></li>`;
+  for (const r of c.rows) {
+    tl += walkRow(r.w, r.m) + sunRow(r.arr);
+    tl += `<li class="tl-stop ${r.s.done ? 'done' : ''}" style="--c:${catVar(r.p.c)}"><span class="num">${r.i + 1}</span>
+      <div class="card">
+        <div class="r1"><time>${fromMin(r.arr)}–${fromMin(r.dep)}</time>${pill(r.st)}</div>
+        <button class="sname" data-act="open" data-id="${r.p.id}">${esc(r.p.n)}</button>
+        <div class="ctrl">
+          <button data-act="dur" data-i="${r.i}" data-v="-15" aria-label="15 minutos menos">−</button>
+          <span class="durv">${fmtMin(r.s.dur)}</span>
+          <button data-act="dur" data-i="${r.i}" data-v="15" aria-label="15 minutos más">+</button>
+          <span class="sp"></span>
+          <button data-act="mv" data-i="${r.i}" data-v="-1" aria-label="Subir" ${r.i === 0 ? 'disabled' : ''}>${IC.up}</button>
+          <button data-act="mv" data-i="${r.i}" data-v="1" aria-label="Bajar" ${r.i === d.stops.length - 1 ? 'disabled' : ''}>${IC.down}</button>
+          <button data-act="done" data-i="${r.i}" class="${r.s.done ? 'on' : ''}" aria-label="Marcar como hecho">${IC.check}</button>
+          <button data-act="del" data-i="${r.i}" aria-label="Quitar">${IC.x}</button>
+        </div>
+      </div></li>`;
+  }
+  if (c.back) tl += walkRow(c.back.w, c.back.m) + sunRow(c.back.arr) + `<li class="tl-node"><span class="ic">H</span><div><time>${fromMin(c.back.arr)}</time> · De vuelta en el hotel</div></li>`;
+  else if (c.rows.length) tl += sunRow(c.end);
+
+  const lim = toMin(d.limit);
+  let limitMsg = '';
+  if (lim !== null && c.rows.length) {
+    const diff = c.end - lim;
+    limitMsg = diff > 0
+      ? `<div class="banner limitmsg" style="background:var(--bad-soft)"><div><b style="color:var(--bad)">Os pasáis ${fmtMin(diff)}</b> de la hora límite (${d.limit}). Quitad o acortad alguna parada.</div></div>`
+      : `<p class="muted limitmsg">Margen de ${fmtMin(-diff)} antes de las ${d.limit}.</p>`;
+  }
+  const url = gmapsRoute(dk);
+  const tpls = TEMPLATES[dk].map((t, i) => `<div class="tpl-item"><b>${esc(t.n)}</b><p>${esc(t.d)}</p>
+      <p>${t.s.map(([id]) => esc(BYID[id]?.n || id)).join(' → ')}</p>
+      <div class="row"><button class="btn small primary" data-act="tpl" data-i="${i}">Cargar ruta</button><button class="btn small" data-act="tpladd" data-i="${i}">Añadir al final</button></div></div>`).join('');
+
+  $('#view-plan').innerHTML = `${hotelBanner()}
+    <div class="plan-head">
+      ${daySeg('day', S.day)}
+      <p class="day-note">${esc(DAYS[dk].note)}</p>
+      <div class="settings">
+        <label for="p-start">Salida<input type="time" id="p-start" value="${esc(d.start)}"></label>
+        <label for="p-from">Desde<select id="p-from"><option value="hotel">el hotel</option><option value="gps" ${d.from === 'gps' ? 'selected' : ''}>mi posición</option></select></label>
+        ${DAYS[dk].limit ? `<label for="p-limit">Hora límite<input type="time" id="p-limit" value="${esc(d.limit)}"></label>` : ''}
+        <label class="check" for="p-back"><input type="checkbox" id="p-back" ${d.back ? 'checked' : ''}>Terminar volviendo al hotel</label>
+      </div>
+      ${c.rows.length ? `<div class="actions">
+        <button class="btn" data-act="opt">${IC.shuffle}Optimizar orden</button>
+        <button class="btn" data-act="mapday">${IC.map}Ver en el mapa</button>
+        ${url ? `<a class="btn" href="${url}" target="_blank" rel="noopener">${IC.ext}Ruta en Google Maps</a>` : ''}
+      </div>` : ''}
+    </div>
+    ${c.rows.length ? `<ol class="tl">${tl}</ol>
+      <div class="totals">
+        <div><b>${c.rows.length}</b><span>paradas</span></div>
+        <div><b>${fmtDist(c.mTot)}</b><span>${fmtMin(c.walkTot)} a pie</span></div>
+        <div><b>${fromMin(c.end)}</b><span>${c.back ? 'en el hotel' : 'fin'}</span></div>
+      </div>${limitMsg}`
+    : `<div class="empty">Todavía no hay paradas para el ${esc(DAYS[dk].label.split(' ·')[0].toLowerCase())}.<br>Añade sitios desde Explorar con el botón + o carga una ruta sugerida.</div>`}
+    <details class="box" ${c.rows.length ? '' : 'open'}><summary>Rutas sugeridas para el ${esc(DAYS[dk].short.toLowerCase())}</summary><div class="tpl">${tpls}</div></details>
+    <details class="box" ${d.notes ? 'open' : ''}><summary>Notas del día</summary><textarea id="p-notes" placeholder="Reservas, horas de entradas, ideas…">${esc(d.notes)}</textarea></details>
+    ${c.rows.length ? `<p style="margin-top:12px"><button class="btn small" data-act="clear">Vaciar este día</button></p>` : ''}`;
+}
+
+// ---------- Info view ----------
+function packPlan() {
+  const o = { v: 1, h: S.hotel, d: {} };
+  for (const k of DAYKEYS) { const d = S.days[k]; o.d[k] = { s: d.start, f: d.from, b: d.back ? 1 : 0, l: d.limit, n: d.notes, x: d.stops.map(s => [s.id, s.dur, s.done ? 1 : 0]) }; }
+  return 'DUBLIN1:' + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+}
+function unpackPlan(txt) {
+  const m = /DUBLIN1:([A-Za-z0-9+/=]+)/.exec(txt || '');
+  if (!m) throw new Error('code');
+  const o = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+  const days = {};
+  for (const k of DAYKEYS) {
+    const x = (o.d || {})[k] || {}, def = defState().days[k];
+    days[k] = { start: x.s || def.start, from: x.f || 'hotel', back: x.b !== 0, limit: x.l ?? def.limit, notes: x.n || '',
+      stops: (x.x || []).filter(s => BYID[s[0]]).map(s => ({ id: s[0], dur: +s[1] || BYID[s[0]].dur, done: !!s[2] })) };
+  }
+  return { hotel: HOTELS[o.h] ? o.h : S.hotel, days };
+}
+function offlineLine() {
+  if (!PWA) return 'Esta copia funciona sin conexión mientras la página siga abierta en el navegador. Para tenerla siempre disponible, usa la versión instalable.';
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) return '✓ Guardada en este móvil: ya funciona sin conexión.';
+  return 'Guardándose para usar sin conexión… Si no cambia, recarga la página una vez con internet.';
+}
+function renderInfo() {
+  $('#view-info').innerHTML = `<div class="info">
+    <section><h2 class="h2">Vuestro viaje</h2>
+      <dl class="kv">
+        <dt>Jue 5</dt><dd>Llegada al hotel sobre las 11–12 h. Dejar maletas, comer y centro hasta la cena.</dd>
+        <dt>Vie 6</dt><dd>Excursión desde las 8:30–9:00 hasta la hora de cenar.</dd>
+        <dt>Sáb 7</dt><dd>Mañana corta. Comer pronto y salir hacia el aeropuerto sobre las 13:15 (vuelo ~16:00).</dd>
+      </dl></section>
+    <section><h2 class="h2">Vuestro hotel</h2>
+      <div class="hotelpick">${Object.entries(HOTELS).map(([k, h]) => `<label for="h-${k}"><input type="radio" name="hotel" id="h-${k}" value="${k}" ${S.hotel === k ? 'checked' : ''}><span><b>${esc(h.name)}</b><small>${esc(h.addr)}</small></span></label>`).join('')}</div></section>
+    <section><h2 class="h2">Luz y tiempo</h2>
+      <dl class="kv"><dt>${SUNRISE}</dt><dd>Amanece</dd><dt>${SUNSET}</dt><dd>Anochece. Los parques cierran a esa hora; dejad museos y pubs para la tarde.</dd><dt>6–11 °C</dt><dd>Chubascos frecuentes y viento. Mejor chubasquero con capucha que paraguas, y calzado que aguante agua.</dd></dl></section>
+    <section><h2 class="h2">Al aeropuerto el sábado</h2>
+      <p>Con vuelo hacia las 16:00, estad en el aeropuerto sobre las 14:00. Irlanda no está en Schengen: hay control de documentación.</p>
+      <ul>
+        <li><b>Taxi o app FREENOW:</b> 25–40 min, unos 30–40 € desde el centro. Lo más cómodo con maletas.</li>
+        <li><b>Aircoach (700) o Dublin Express:</b> salen del centro (O'Connell Street y otras paradas), cada 15–30 min, unos 30–45 min, alrededor de 10 € por persona.</li>
+        <li><b>Dublin Bus 16 o 41:</b> desde O'Connell Street, unos 2–3 €, pero 45–60 min y poco sitio para maletas.</li>
+      </ul>
+      <p class="muted">Precios y paradas aproximados: comprobad la parada más cercana al hotel antes del sábado.</p></section>
+    <section><h2 class="h2">Moverse</h2>
+      <ul>
+        <li>El centro se recorre a pie: de Christ Church a Merrion Square hay unos 25 min.</li>
+        <li><b>Luas (tranvía):</b> la línea roja va por los muelles del norte (Abbey St, Jervis, Four Courts, Smithfield) hasta Heuston, útil para la Guinness y Kilmainham. Billete en la máquina de la parada.</li>
+        <li><b>Bus:</b> billete en la app TFI Go o con tarjeta Leap. En efectivo solo monedas y sin cambio.</li>
+        <li>Se conduce por la izquierda: mirad a la derecha al cruzar.</li>
+      </ul></section>
+    <section><h2 class="h2">Excursión del viernes</h2>
+      <p class="muted">Si ya la tenéis, mirad en el bono la hora y el punto de salida exacto. Si no, estas son las de Civitatis:</p>
+      ${TRIPS.map(t => `<a class="trip" href="${esc(t.u)}" target="_blank" rel="noopener"><b><span>${esc(t.n)}</span><span>${esc(t.p)}</span></b><span>${esc(t.t)}</span></a>`).join('')}</section>
+    <section><h2 class="h2">Consejos</h2>
+      <ul>
+        <li>Enchufes tipo G (británico): llevad adaptador.</li>
+        <li>En los pubs se pide y se paga en la barra, sin propina. En restaurantes con servicio de mesa, un 10 % si os ha gustado.</li>
+        <li>Muchas cocinas de pub cierran sobre las 21:00. La música tradicional suele empezar a partir de las 21:00.</li>
+        <li>Con DNI basta. La tarjeta se acepta en casi todas partes. Emergencias: 112 o 999.</li>
+      </ul></section>
+    <section><h2 class="h2">Usar sin internet</h2>
+      <p id="offline-status"><b>${esc(offlineLine())}</b></p>
+      <ul>
+        <li><b>Android (Chrome):</b> menú ⋮ → "Añadir a pantalla de inicio" o "Instalar aplicación".</li>
+        <li><b>iPhone (Safari):</b> botón Compartir → "Añadir a pantalla de inicio".</li>
+        <li>Abridla una vez con internet antes de salir. El plan se guarda en cada móvil.</li>
+        <li>Funcionan sin internet: buscador, fichas, mapa, rutas y GPS. Necesitan internet: enlaces de entradas y Google Maps.</li>
+        <li>Para navegar calle a calle sin datos, descargad la zona de Dublín en Google Maps (Mapas sin conexión) o en la app Organic Maps.</li>
+      </ul></section>
+    <section><h2 class="h2">Pasar el plan a otro móvil</h2>
+      <p class="muted">Copiad el código y mandadlo por WhatsApp. En el otro móvil, pegadlo abajo y pulsad Importar.</p>
+      <div class="row"><button class="btn primary" data-act="export">Copiar código del plan</button>${navigator.share ? '<button class="btn" data-act="share">Compartir</button>' : ''}</div>
+      <textarea id="io" aria-label="Código del plan" placeholder="Pega aquí un código DUBLIN1:…"></textarea>
+      <div class="row"><button class="btn" data-act="import">Importar plan</button><button class="btn" data-act="reset" id="reset-btn">Borrar todo el plan</button></div>
+    </section>
+    <p class="muted" style="font-size:12.5px">Horarios y precios orientativos de noviembre, preparados el 3 de noviembre de 2026. Pueden cambiar: comprobadlos en la web oficial antes de ir.</p>
+  </div>`;
+}
+
+// ---------- Map ----------
+const LAT0 = 53.345, LON0 = -6.265, KX = 111320 * Math.cos(LAT0 * Math.PI / 180), KY = 110574;
+const proj = (lat, lon) => [(lon - LON0) * KX, -(lat - LAT0) * KY];
+const BASE = {
+  river: [[53.3478, -6.3050], [53.3470, -6.2950], [53.3463, -6.2870], [53.3459, -6.2800], [53.3455, -6.2750], [53.3452, -6.2705], [53.3455, -6.2665], [53.3462, -6.2632], [53.3471, -6.2593], [53.3476, -6.2550], [53.3478, -6.2500], [53.3474, -6.2450], [53.3469, -6.2413], [53.3463, -6.2350], [53.3460, -6.2280]],
+  canal: [[53.3330, -6.2850], [53.3318, -6.2720], [53.3316, -6.2650], [53.3320, -6.2560], [53.3332, -6.2480], [53.3345, -6.2430], [53.3385, -6.2385], [53.3410, -6.2370]],
+  parks: [
+    [[53.3396, -6.2614], [53.3396, -6.2569], [53.3369, -6.2569], [53.3369, -6.2614]],
+    [[53.3413, -6.2510], [53.3405, -6.2470], [53.3385, -6.2480], [53.3393, -6.2520]],
+    [[53.3364, -6.2630], [53.3364, -6.2602], [53.3345, -6.2602], [53.3345, -6.2630]],
+    [[53.3400, -6.2723], [53.3400, -6.2708], [53.3388, -6.2708], [53.3388, -6.2723]],
+    [[53.3545, -6.2652], [53.3545, -6.2635], [53.3535, -6.2635], [53.3535, -6.2652]],
+    [[53.3492, -6.2950], [53.3560, -6.2965], [53.3640, -6.3150], [53.3650, -6.3400], [53.3540, -6.3450], [53.3478, -6.3080]]
+  ],
+  campus: [[[53.3448, -6.2595], [53.3447, -6.2525], [53.3425, -6.2515], [53.3426, -6.2592]], [[53.3436, -6.2690], [53.3436, -6.2655], [53.3420, -6.2655], [53.3420, -6.2690]]],
+  streets: [
+    { n: "O'CONNELL ST", at: 3, pts: [[53.3472, -6.2592], [53.3485, -6.2598], [53.3500, -6.2604], [53.3530, -6.2615]] },
+    { n: 'GRAFTON ST', at: 1, pts: [[53.3440, -6.2597], [53.3420, -6.2600], [53.3398, -6.2607]] },
+    { n: 'DAME ST', at: 1, pts: [[53.3443, -6.2600], [53.3442, -6.2640], [53.3441, -6.2668], [53.3435, -6.2700], [53.3433, -6.2716]] },
+    { n: 'THOMAS ST', at: 1, pts: [[53.3433, -6.2716], [53.3431, -6.2770], [53.3430, -6.2820], [53.3425, -6.2870], [53.3422, -6.2960]] },
+    { n: 'HENRY ST', at: 1, pts: [[53.3494, -6.2605], [53.3490, -6.2650], [53.3484, -6.2695]] },
+    { n: 'PARNELL ST', at: 1, pts: [[53.3525, -6.2600], [53.3522, -6.2665], [53.3520, -6.2710]] },
+    { n: 'PATRICK ST', at: 1, pts: [[53.3433, -6.2716], [53.3410, -6.2717], [53.3375, -6.2720]] },
+    { n: 'NASSAU ST', at: 1, pts: [[53.3428, -6.2595], [53.3423, -6.2555], [53.3418, -6.2525]] },
+    { n: 'WESTMORELAND ST', at: 1, pts: [[53.3471, -6.2593], [53.3455, -6.2595], [53.3443, -6.2600]] },
+    { n: 'MERRION ST', at: 1, pts: [[53.3418, -6.2525], [53.3400, -6.2522], [53.3380, -6.2520]] },
+    { n: "ST STEPHEN'S GREEN N", at: 9, pts: [[53.3398, -6.2614], [53.3398, -6.2565]] },
+    { n: 'CAPEL ST', at: 1, pts: [[53.3463, -6.2690], [53.3490, -6.2697], [53.3520, -6.2705]] },
+    { n: 'GEORGE ST', at: 1, pts: [[53.3442, -6.2640], [53.3425, -6.2637], [53.3405, -6.2640]] }
+  ],
+  water: [{ n: 'Río Liffey', lat: 53.3474, lon: -6.2520 }, { n: 'Río Liffey', lat: 53.3462, lon: -6.2810 }]
+};
+let mapReady = false, view = null, svg, markers = [], selId = null;
+const SVGNS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs = {}, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const pathD = (pts, close) => pts.map(([la, lo], i) => { const [x, y] = proj(la, lo); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join(' ') + (close ? 'Z' : '');
+let riverEl;
+
+function initMap() {
+  svg = $('#map');
+  const base = mk('g', {}, svg);
+  BASE.campus.forEach(c => mk('path', { d: pathD(c, true), class: 'campus' }, base));
+  BASE.parks.forEach(p => mk('path', { d: pathD(p, true), class: 'park' }, base));
+  mk('path', { d: pathD(BASE.canal), class: 'canal' }, base);
+  riverEl = mk('path', { d: pathD(BASE.river), class: 'river' }, base);
+  BASE.streets.forEach(s => mk('path', { d: pathD(s.pts), class: 'st-edge' }, base));
+  BASE.streets.forEach(s => mk('path', { d: pathD(s.pts), class: 'st' }, base));
+  mk('g', { id: 'routeg' }, svg);
+  mk('g', { id: 'lblg' }, svg);
+  mk('g', { id: 'mkg' }, svg);
+  mk('g', { id: 'topg' }, svg);
+  const lg = $('#lblg');
+  BASE.streets.forEach(s => {
+    const a = s.pts[Math.min(s.at, s.pts.length - 1)], b = s.pts[Math.max(0, Math.min(s.at, s.pts.length - 1) - 1)];
+    const [x, y] = proj((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+    const g = mk('g', { class: 'lbl' }, lg); const t = mk('text', { 'text-anchor': 'middle', y: 3 }, g); t.textContent = s.n;
+    markers.push({ el: g, x, y, kind: 'street' });
+  });
+  BASE.water.forEach(w => {
+    const [x, y] = proj(w.lat, w.lon);
+    const g = mk('g', { class: 'lbl water' }, lg); const t = mk('text', { 'text-anchor': 'middle', y: 18 }, g); t.textContent = w.n;
+    markers.push({ el: g, x, y, kind: 'street' });
+  });
+  attachMapEvents();
+  new ResizeObserver(() => applyView()).observe(svg);
+  mapReady = true;
+}
+function fitView(bounds) {
+  const r = svg.getBoundingClientRect();
+  const [x0, y0] = proj(bounds[1][0], bounds[0][1]), [x1, y1] = proj(bounds[0][0], bounds[1][1]);
+  const aspect = (r.width || 400) / (r.height || 600);
+  const w = Math.max(x1 - x0, (y1 - y0) * aspect) * 1.15;
+  view = { x: (x0 + x1) / 2 - w / 2, y: (y0 + y1) / 2 - (w / aspect) / 2, w };
+}
+function centerOn(lat, lon, w) {
+  const r = svg.getBoundingClientRect();
+  const aspect = (r.width || 400) / (r.height || 600);
+  const [x, y] = proj(lat, lon);
+  view.w = w || view.w;
+  view.x = x - view.w / 2; view.y = y - (view.w / aspect) / 2 + (view.w / aspect) * 0.08;
+  applyView();
+}
+function applyView() {
+  if (!svg || !view) return;
+  const r = svg.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const h = view.w * r.height / r.width;
+  svg.setAttribute('viewBox', `${view.x.toFixed(1)} ${view.y.toFixed(1)} ${view.w.toFixed(1)} ${h.toFixed(1)}`);
+  const s = view.w / r.width;
+  for (const m of markers) m.el.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) scale(${s.toFixed(4)})`);
+  riverEl.style.strokeWidth = Math.max(38, s * 6) + 'px';
+  svg.classList.toggle('labels', s < 1.5);
+  $('#lblg').style.display = s < 4.5 ? '' : 'none';
+}
+function zoomAt(cx, cy, f) {
+  const r = svg.getBoundingClientRect();
+  const s = view.w / r.width;
+  const ns = Math.min(40, Math.max(0.35, s * f));
+  const wx = view.x + (cx - r.left) * s, wy = view.y + (cy - r.top) * s;
+  view.w = ns * r.width; view.x = wx - (cx - r.left) * ns; view.y = wy - (cy - r.top) * ns;
+  applyView();
+}
+function attachMapEvents() {
+  const pts = new Map();
+  let moved = 0, downId = null;
+  svg.addEventListener('pointerdown', e => {
+    try { svg.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 1) { moved = 0; const t = e.target.closest && e.target.closest('[data-id]'); downId = t ? t.getAttribute('data-id') : null; }
+    else downId = null;
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    const prev = pts.get(e.pointerId), cur = [e.clientX, e.clientY];
+    const r = svg.getBoundingClientRect(), s = view.w / r.width;
+    if (pts.size === 1) {
+      view.x -= (cur[0] - prev[0]) * s; view.y -= (cur[1] - prev[1]) * s;
+      moved += Math.abs(cur[0] - prev[0]) + Math.abs(cur[1] - prev[1]);
+      pts.set(e.pointerId, cur);
+      applyView();
+    } else if (pts.size === 2) {
+      const before = [...pts.values()];
+      pts.set(e.pointerId, cur);
+      const after = [...pts.values()];
+      const d0 = Math.hypot(before[0][0] - before[1][0], before[0][1] - before[1][1]);
+      const d1 = Math.hypot(after[0][0] - after[1][0], after[0][1] - after[1][1]);
+      if (d0 < 1 || d1 < 1) return;
+      const m0 = [(before[0][0] + before[1][0]) / 2, (before[0][1] + before[1][1]) / 2];
+      const m1 = [(after[0][0] + after[1][0]) / 2, (after[0][1] + after[1][1]) / 2];
+      const wx = view.x + (m0[0] - r.left) * s, wy = view.y + (m0[1] - r.top) * s;
+      const ns = Math.min(40, Math.max(0.35, s * d0 / d1));
+      view.w = ns * r.width; view.x = wx - (m1[0] - r.left) * ns; view.y = wy - (m1[1] - r.top) * ns;
+      moved += 99;
+      applyView();
+    }
+  });
+  const end = e => {
+    if (!pts.has(e.pointerId)) return;
+    const wasSingle = pts.size === 1;
+    pts.delete(e.pointerId);
+    if (e.type === 'pointerup' && wasSingle && moved < 10) selectOnMap(downId);
+  };
+  svg.addEventListener('pointerup', end);
+  svg.addEventListener('pointercancel', end);
+  svg.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY > 0 ? 1.18 : 1 / 1.18); }, { passive: false });
+}
+function renderMarkers() {
+  if (!mapReady) return;
+  markers = markers.filter(m => m.kind === 'street');
+  const g = $('#mkg'), top = $('#topg'), rg = $('#routeg');
+  g.innerHTML = ''; top.innerHTML = ''; rg.innerHTML = '';
+  const mode = S.mapMode;
+  const dayStops = mode !== 'all' ? S.days[mode].stops : [];
+  const stopIdx = new Map(dayStops.map((s, i) => [s.id, i + 1]));
+  if (mode !== 'all') {
+    const c = computeDay(mode);
+    if (c.rows.length) {
+      const pts = [c.start, ...c.rows.map(r => r.p), ...(c.back ? [hotelPt()] : [])];
+      mk('path', { d: pathD(pts.map(p => [p.lat, p.lon])), class: 'route' }, rg);
+    }
+  }
+  const ordered = PLACES.slice().sort((a, b) => (stopIdx.has(a.id) ? 1 : 0) - (stopIdx.has(b.id) ? 1 : 0));
+  for (const p of ordered) {
+    const [x, y] = proj(p.lat, p.lon);
+    const n = stopIdx.get(p.id);
+    const cls = ['mk', n ? 'stop' : '', mode !== 'all' && !n ? 'dim' : '', selId === p.id ? 'sel' : ''].join(' ');
+    const el = mk('g', { class: cls, 'data-id': p.id }, g);
+    mk('circle', { r: n ? 11 : 7, fill: catVar(p.c) }, el);
+    mk('circle', { r: 18, class: 'hit' }, el);
+    if (n) { const t = mk('text', { class: 'num', 'text-anchor': 'middle', y: 4 }, el); t.textContent = n; }
+    const t = mk('text', { class: 'name', x: n ? 14 : 10, y: 4 }, el); t.textContent = p.n;
+    markers.push({ el, x, y });
+  }
+  const h = hotelPt(), [hx, hy] = proj(h.lat, h.lon);
+  const he = mk('g', { class: 'mk stop' }, top);
+  mk('rect', { x: -10, y: -10, width: 20, height: 20, rx: 5, fill: 'var(--ink)', stroke: 'var(--surface)', 'stroke-width': 2 }, he);
+  const ht = mk('text', { 'text-anchor': 'middle', y: 4.5, style: 'fill:var(--bg);stroke:none;font-weight:800;font-size:12px' }, he); ht.textContent = 'H';
+  const hn = mk('text', { class: 'name', x: 14, y: 4 }, he); hn.textContent = hotel().name;
+  markers.push({ el: he, x: hx, y: hy });
+  if (GPS && gpsInDublin()) {
+    const [gx, gy] = proj(GPS.lat, GPS.lon);
+    const ge = mk('g', {}, top);
+    mk('circle', { r: 16, fill: '#2F7BEA', opacity: 0.18 }, ge);
+    mk('circle', { r: 7, fill: '#2F7BEA', stroke: '#fff', 'stroke-width': 2.5 }, ge);
+    markers.push({ el: ge, x: gx, y: gy });
+  }
+  $('#mapmode').innerHTML = [['all', 'Todo'], ...DAYKEYS.map(k => [k, 'Ruta ' + DAYS[k].short])].map(([k, n]) => `<button type="button" data-act="mapmode" data-day="${k}" aria-pressed="${mode === k}">${n}</button>`).join('');
+  applyView();
+  renderMapCard();
+}
+function selectOnMap(id) {
+  selId = id && BYID[id] ? id : null;
+  renderMarkers();
+}
+function renderMapCard() {
+  const card = $('#mapcard');
+  const p = selId && BYID[selId];
+  $('#mapnote').hidden = !!p;
+  if (!p) { card.hidden = true; return; }
+  const m = dist(refPt(), p);
+  const idx = S.days[S.day].stops.findIndex(s => s.id === p.id);
+  card.hidden = false;
+  card.innerHTML = `<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span class="t">${esc(p.n)}</span><button class="btn small" data-act="mapclose" aria-label="Cerrar">${IC.x}</button></div>
+    <div class="item-meta"><span class="dot" style="--c:${catVar(p.c)}"></span>${esc(CATS[p.c].one)} · ${walkMin(m)} min a pie · ${fmtMin(p.dur)} ${pill(hoursLabel(p))}</div>
+    <div class="row"><button class="btn small primary" data-act="open" data-id="${p.id}">Ver ficha</button>
+    <button class="btn small" data-act="add" data-id="${p.id}">${idx >= 0 ? `Quitar del ${DAYS[S.day].short}` : `+ Añadir al ${DAYS[S.day].short}`}</button></div>`;
+}
+function showMap(focusId, mode) {
+  setTab('map');
+  if (mode) S.mapMode = mode;
+  if (focusId) selId = focusId;
+  renderMarkers();
+  if (focusId) { const p = BYID[focusId]; centerOn(p.lat, p.lon, Math.min(view.w, 1400)); }
+  else if (mode && mode !== 'all') {
+    const c = computeDay(mode);
+    const all = [c.start, ...c.rows.map(r => r.p)];
+    if (all.length > 1) {
+      const la = all.map(p => p.lat), lo = all.map(p => p.lon);
+      fitView([[Math.min(...la), Math.min(...lo)], [Math.max(...la), Math.max(...lo)]]);
+      applyView();
+    }
+  }
+}
+
+// ---------- GPS ----------
+let watchId = null, gpsWaiters = [];
+function startGPS(cb) {
+  if (cb) gpsWaiters.push(cb);
+  if (!navigator.geolocation) { toast('Este navegador no da la posición'); return; }
+  if (watchId !== null) { if (GPS) flushGPS(); return; }
+  try {
+    watchId = navigator.geolocation.watchPosition(pos => {
+      const prev = GPS;
+      GPS = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy };
+      flushGPS();
+      if (!prev || dist(prev, GPS) > 25) onGPSMove();
+    }, () => {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = null; gpsWaiters = [];
+      toast('No se pudo obtener la posición. Revisa el permiso de ubicación.');
+    }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 25000 });
+  } catch (e) { watchId = null; toast('No se pudo obtener la posición'); }
+}
+function flushGPS() { const w = gpsWaiters; gpsWaiters = []; w.forEach(f => f()); }
+function onGPSMove() {
+  if (!gpsInDublin()) { toast('Estás lejos de Dublín: las distancias se miden desde el hotel'); return; }
+  if (S.tab === 'explore') renderList();
+  if (S.tab === 'map') renderMarkers();
+  if (S.tab === 'plan' && S.days[S.day].from === 'gps') renderPlan();
+}
+
+// ---------- Tabs & rendering ----------
+function setTab(t) {
+  S.tab = t; save();
+  for (const b of document.querySelectorAll('#tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === t));
+  for (const k of Object.keys(TAB_HASH)) $(`#view-${k}`).hidden = k !== t;
+  $('#main').style.overflowY = t === 'map' ? 'hidden' : 'auto';
+  try { history.replaceState(history.state, '', '#' + TAB_HASH[t]); } catch (e) { /* ignore */ }
+  if (t === 'map') {
+    if (!mapReady) initMap();
+    if (!view) fitView([[53.3375, -6.2760], [53.3535, -6.2470]]);
+    renderMarkers();
+  } else if (t === 'plan') renderPlan();
+  else if (t === 'info') renderInfo();
+  else renderExplore();
+  $('#main').scrollTop = 0;
+}
+function renderAll() {
+  if (S.tab === 'explore') renderExplore();
+  if (S.tab === 'plan') renderPlan();
+  if (S.tab === 'map') renderMarkers();
+  if (S.tab === 'info') renderInfo();
+  if (!$('#sheet').hidden) renderSheet();
+}
+function renderNet() {
+  const on = navigator.onLine;
+  const n = $('#net');
+  n.textContent = on ? 'Con conexión' : 'Sin conexión';
+  n.classList.toggle('on', !on);
+  const os = $('#offline-status');
+  if (os) os.innerHTML = `<b>${esc(offlineLine())}</b>`;
+}
+
+// ---------- Events ----------
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id, i = +el.dataset.i, v = +el.dataset.v;
+  const d = S.days[S.day];
+  switch (a) {
+    case 'open': openDetail(id); break;
+    case 'add': toggleStop(id, el.dataset.day || S.day); break;
+    case 'cat': S.cat = id; save(); renderCats(); renderList(); break;
+    case 'day': S.day = el.dataset.day; save(); renderAll(); break;
+    case 'hotel': S.hotel = id; save(); renderAll(); toast(`Hotel: ${HOTELS[id].name}`); break;
+    case 'dur': d.stops[i].dur = Math.max(5, Math.min(360, d.stops[i].dur + v)); save(); renderPlan(); break;
+    case 'mv': { const j = i + v; if (j < 0 || j >= d.stops.length) break; [d.stops[i], d.stops[j]] = [d.stops[j], d.stops[i]]; save(); renderPlan(); break; }
+    case 'done': d.stops[i].done = !d.stops[i].done; save(); renderPlan(); break;
+    case 'del': snapshot(); d.stops.splice(i, 1); save(); renderPlan(); toast('Parada quitada', 'Deshacer', restore); break;
+    case 'opt': optimize(S.day); break;
+    case 'tpl': loadTemplate(S.day, i, false); break;
+    case 'tpladd': loadTemplate(S.day, i, true); break;
+    case 'clear': snapshot(); d.stops = []; save(); renderPlan(); toast('Día vaciado', 'Deshacer', restore); break;
+    case 'mapday': showMap(null, S.day); break;
+    case 'mapfocus': closeDetail(); showMap(id); break;
+    case 'mapmode': S.mapMode = el.dataset.day; save(); showMap(null, S.mapMode); break;
+    case 'mapclose': selectOnMap(null); break;
+    case 'export': {
+      const code = packPlan(), io = $('#io');
+      io.value = code;
+      const sel = () => { io.focus(); io.select(); toast('Código seleccionado: cópialo'); };
+      try { navigator.clipboard.writeText(code).then(() => toast('Código copiado'), sel); } catch (err) { sel(); }
+      break;
+    }
+    case 'share': navigator.share({ title: 'Plan Dublín', text: packPlan() }).catch(() => {}); break;
+    case 'import': {
+      try { const r = unpackPlan($('#io').value); snapshot(); S.days = r.days; S.hotel = r.hotel; save(); renderInfo(); toast('Plan importado', 'Deshacer', restore); }
+      catch (err) { toast('Ese texto no es un código de plan válido. Debe empezar por DUBLIN1:'); }
+      break;
+    }
+    case 'reset':
+      if (el.dataset.armed) { snapshot(); S.days = defState().days; save(); renderInfo(); toast('Plan borrado', 'Deshacer', restore); }
+      else { el.dataset.armed = '1'; el.textContent = 'Pulsa otra vez para borrar'; el.style.color = 'var(--bad)'; }
+      break;
+  }
+});
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
+$('#q').addEventListener('input', renderList);
+$('#q-clear').addEventListener('click', () => { $('#q').value = ''; renderList(); $('#q').focus(); });
+$('#ref').addEventListener('change', e => {
+  S.ref = e.target.value; save();
+  if (S.ref === 'gps') { toast('Buscando tu posición…'); startGPS(renderList); }
+  renderList();
+});
+$('#sort').addEventListener('change', e => { S.sort = e.target.value; save(); renderList(); });
+$('#sheet-close').addEventListener('click', () => closeDetail());
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+$('#view-plan').addEventListener('change', e => {
+  const d = S.days[S.day], t = e.target;
+  if (t.id === 'p-start' && toMin(t.value) !== null) d.start = t.value;
+  else if (t.id === 'p-limit') d.limit = t.value;
+  else if (t.id === 'p-back') d.back = t.checked;
+  else if (t.id === 'p-from') { d.from = t.value; if (t.value === 'gps') startGPS(renderPlan); }
+  else return;
+  save(); renderPlan();
+});
+$('#view-plan').addEventListener('input', e => { if (e.target.id === 'p-notes') { S.days[S.day].notes = e.target.value; save(); } });
+$('#view-info').addEventListener('change', e => { if (e.target.name === 'hotel') { S.hotel = e.target.value; save(); toast(`Hotel: ${HOTELS[S.hotel].name}`); } });
+$('#zin').addEventListener('click', () => { const r = svg.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1 / 1.5); });
+$('#zout').addEventListener('click', () => { const r = svg.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.5); });
+$('#zhotel').addEventListener('click', () => { const h = hotelPt(); centerOn(h.lat, h.lon, 1600); });
+$('#zgps').addEventListener('click', () => {
+  toast('Buscando tu posición…');
+  startGPS(() => { if (!gpsInDublin()) { toast('Estás lejos de Dublín'); return; } renderMarkers(); centerOn(GPS.lat, GPS.lon, 1200); });
+});
+window.addEventListener('online', renderNet);
+window.addEventListener('offline', renderNet);
+
+// ---------- Boot ----------
+(function boot() {
+  const fromHash = Object.entries(TAB_HASH).find(([, h]) => '#' + h === location.hash);
+  setTab(fromHash ? fromHash[0] : (S.tab || 'explore'));
+  renderNet();
+  if (S.ref === 'gps' || DAYKEYS.some(k => S.days[k].from === 'gps')) startGPS();
+  if (PWA && 'serviceWorker' in navigator && location.protocol !== 'file:') {
+    navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(renderNet).catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', renderNet);
+  }
+})();
+
+</script>
+
+</body>
+</html>
