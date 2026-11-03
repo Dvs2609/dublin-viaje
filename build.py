@@ -13,7 +13,7 @@ app = (SRC / 'map.js').read_text() + '\n' + (SRC / 'app.js').read_text()
 
 def fragment(pwa):
     js = app.replace('/*__PWA__*/false', 'true' if pwa else 'false')
-    return shell.replace('/*__DATA__*/', data).replace('/*__APP__*/', js)
+    return shell.replace('/*__DATA__*/', data).replace('/*__OSM__*/', (SRC / 'osm.js').read_text()).replace('/*__APP__*/', js)
 
 (DIST / 'artifact.html').write_text(fragment(False))
 

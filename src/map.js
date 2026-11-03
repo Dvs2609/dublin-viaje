@@ -3,66 +3,32 @@
 // ---------- Map ----------
 const LAT0 = 53.345, LON0 = -6.265, KX = 111320 * Math.cos(LAT0 * Math.PI / 180), KY = 110574;
 const proj = (lat, lon) => [(lon - LON0) * KX, -(lat - LAT0) * KY];
-const BASE = {
-  river: [[53.3478, -6.3050], [53.3470, -6.2950], [53.3463, -6.2870], [53.3459, -6.2800], [53.3455, -6.2750], [53.3452, -6.2705], [53.3455, -6.2665], [53.3462, -6.2632], [53.3471, -6.2593], [53.3476, -6.2550], [53.3478, -6.2500], [53.3474, -6.2450], [53.3469, -6.2413], [53.3463, -6.2350], [53.3460, -6.2280]],
-  canal: [[53.3330, -6.2850], [53.3318, -6.2720], [53.3316, -6.2650], [53.3320, -6.2560], [53.3332, -6.2480], [53.3345, -6.2430], [53.3385, -6.2385], [53.3410, -6.2370]],
-  parks: [
-    [[53.3396, -6.2614], [53.3396, -6.2569], [53.3369, -6.2569], [53.3369, -6.2614]],
-    [[53.3413, -6.2510], [53.3405, -6.2470], [53.3385, -6.2480], [53.3393, -6.2520]],
-    [[53.3364, -6.2630], [53.3364, -6.2602], [53.3345, -6.2602], [53.3345, -6.2630]],
-    [[53.3400, -6.2723], [53.3400, -6.2708], [53.3388, -6.2708], [53.3388, -6.2723]],
-    [[53.3545, -6.2652], [53.3545, -6.2635], [53.3535, -6.2635], [53.3535, -6.2652]],
-    [[53.3492, -6.2950], [53.3560, -6.2965], [53.3640, -6.3150], [53.3650, -6.3400], [53.3540, -6.3450], [53.3478, -6.3080]]
-  ],
-  campus: [[[53.3448, -6.2595], [53.3447, -6.2525], [53.3425, -6.2515], [53.3426, -6.2592]], [[53.3436, -6.2690], [53.3436, -6.2655], [53.3420, -6.2655], [53.3420, -6.2690]]],
-  streets: [
-    { n: "O'CONNELL ST", at: 3, pts: [[53.3472, -6.2592], [53.3485, -6.2598], [53.3500, -6.2604], [53.3530, -6.2615]] },
-    { n: 'GRAFTON ST', at: 1, pts: [[53.3440, -6.2597], [53.3420, -6.2600], [53.3398, -6.2607]] },
-    { n: 'DAME ST', at: 1, pts: [[53.3443, -6.2600], [53.3442, -6.2640], [53.3441, -6.2668], [53.3435, -6.2700], [53.3433, -6.2716]] },
-    { n: 'THOMAS ST', at: 1, pts: [[53.3433, -6.2716], [53.3431, -6.2770], [53.3430, -6.2820], [53.3425, -6.2870], [53.3422, -6.2960]] },
-    { n: 'HENRY ST', at: 1, pts: [[53.3494, -6.2605], [53.3490, -6.2650], [53.3484, -6.2695]] },
-    { n: 'PARNELL ST', at: 1, pts: [[53.3525, -6.2600], [53.3522, -6.2665], [53.3520, -6.2710]] },
-    { n: 'PATRICK ST', at: 1, pts: [[53.3433, -6.2716], [53.3410, -6.2717], [53.3375, -6.2720]] },
-    { n: 'NASSAU ST', at: 1, pts: [[53.3428, -6.2595], [53.3423, -6.2555], [53.3418, -6.2525]] },
-    { n: 'WESTMORELAND ST', at: 1, pts: [[53.3471, -6.2593], [53.3455, -6.2595], [53.3443, -6.2600]] },
-    { n: 'MERRION ST', at: 1, pts: [[53.3418, -6.2525], [53.3400, -6.2522], [53.3380, -6.2520]] },
-    { n: "ST STEPHEN'S GREEN N", at: 9, pts: [[53.3398, -6.2614], [53.3398, -6.2565]] },
-    { n: 'CAPEL ST', at: 1, pts: [[53.3463, -6.2690], [53.3490, -6.2697], [53.3520, -6.2705]] },
-    { n: 'GEORGE ST', at: 1, pts: [[53.3442, -6.2640], [53.3425, -6.2637], [53.3405, -6.2640]] }
-  ],
-  water: [{ n: 'Río Liffey', lat: 53.3474, lon: -6.2520 }, { n: 'Río Liffey', lat: 53.3462, lon: -6.2810 }]
-};
+const WATER_LABELS = [{ n: 'Río Liffey', lat: 53.3474, lon: -6.2520 }, { n: 'Río Liffey', lat: 53.3462, lon: -6.2810 }];
+// Real-world widths (m) and minimum on-screen widths (px) per road class; drawn bottom to top.
+const ROADS = [['foot', 3, 1.2], ['res', 8, 2], ['ped', 8, 2.5], ['ter', 11, 2.5], ['sec', 14, 3.5], ['major', 18, 4]];
+// Street labels: font size and the largest zoom (m per px) at which each class is labelled.
+const LBL = { major: [12.5, 9], sec: [12, 8], ter: [11.5, 4], ped: [11.5, 3.6], res: [11, 2.2], foot: [10, 1.2] };
 let mapReady = false, view = null, svg, markers = [], selId = null;
 const SVGNS = 'http://www.w3.org/2000/svg';
 const mk = (tag, attrs = {}, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
 const pathD = (pts, close) => pts.map(([la, lo], i) => { const [x, y] = proj(la, lo); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join(' ') + (close ? 'Z' : '');
-let riverEl;
+const flatD = (lines, close) => lines.map(a => { let d = `M${a[0]} ${a[1]}`; for (let i = 2; i < a.length; i += 2) d += `L${a[i]} ${a[i + 1]}`; return close ? d + 'Z' : d; }).join('');
+let riverEl, canalEl, roadEls = [];
 
 function initMap() {
   svg = $('#map');
   const base = mk('g', {}, svg);
-  BASE.campus.forEach(c => mk('path', { d: pathD(c, true), class: 'campus' }, base));
-  BASE.parks.forEach(p => mk('path', { d: pathD(p, true), class: 'park' }, base));
-  mk('path', { d: pathD(BASE.canal), class: 'canal' }, base);
-  riverEl = mk('path', { d: pathD(BASE.river), class: 'river' }, base);
-  BASE.streets.forEach(s => mk('path', { d: pathD(s.pts), class: 'st-edge' }, base));
-  BASE.streets.forEach(s => mk('path', { d: pathD(s.pts), class: 'st' }, base));
-  mk('g', { id: 'routeg' }, svg);
+  mk('path', { d: flatD(OSM.parks, true), class: 'park' }, base);
+  canalEl = mk('path', { d: flatD(OSM.canal), class: 'canal' }, base);
+  riverEl = mk('path', { d: flatD(OSM.river), class: 'river' }, base);
+  roadEls = [];
+  for (const [c] of ROADS) roadEls.push([c, 'edge', mk('path', { d: flatD(OSM.roads[c] || []), class: `rd-edge rd-${c}` }, base)]);
+  for (const [c] of ROADS) roadEls.push([c, 'fill', mk('path', { d: flatD(OSM.roads[c] || []), class: `rd rd-${c}` }, base)]);
+  mk('path', { d: flatD(OSM.tram), class: 'tram' }, base);
   mk('g', { id: 'lblg' }, svg);
+  mk('g', { id: 'routeg' }, svg);
   mk('g', { id: 'mkg' }, svg);
   mk('g', { id: 'topg' }, svg);
-  const lg = $('#lblg');
-  BASE.streets.forEach(s => {
-    const a = s.pts[Math.min(s.at, s.pts.length - 1)], b = s.pts[Math.max(0, Math.min(s.at, s.pts.length - 1) - 1)];
-    const [x, y] = proj((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
-    const g = mk('g', { class: 'lbl' }, lg); const t = mk('text', { 'text-anchor': 'middle', y: 3 }, g); t.textContent = s.n;
-    markers.push({ el: g, x, y, kind: 'street' });
-  });
-  BASE.water.forEach(w => {
-    const [x, y] = proj(w.lat, w.lon);
-    const g = mk('g', { class: 'lbl water' }, lg); const t = mk('text', { 'text-anchor': 'middle', y: 18 }, g); t.textContent = w.n;
-    markers.push({ el: g, x, y, kind: 'street' });
-  });
   attachMapEvents();
   new ResizeObserver(() => applyView()).observe(svg);
   mapReady = true;
@@ -90,9 +56,50 @@ function applyView() {
   svg.setAttribute('viewBox', `${view.x.toFixed(1)} ${view.y.toFixed(1)} ${view.w.toFixed(1)} ${h.toFixed(1)}`);
   const s = view.w / r.width;
   for (const m of markers) m.el.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) scale(${s.toFixed(4)})`);
-  riverEl.style.strokeWidth = Math.max(38, s * 6) + 'px';
-  svg.classList.toggle('labels', s < 1.5);
-  $('#lblg').style.display = s < 4.5 ? '' : 'none';
+  for (const [c, kind, el] of roadEls) {
+    const [, real, min] = ROADS.find(x => x[0] === c);
+    const w = Math.min(40, Math.max(min, real / s));
+    el.style.strokeWidth = (kind === 'edge' ? w + 2 : w) + 'px';
+  }
+  riverEl.style.strokeWidth = Math.max(5, 42 / s) + 'px';
+  canalEl.style.strokeWidth = Math.max(2, 14 / s) + 'px';
+  svg.classList.toggle('labels', s < 1.2);
+  scheduleLabels();
+}
+// Street names are laid out after the view settles: highest-class streets first, skipping any that would overlap.
+let lblT = null;
+function scheduleLabels() { clearTimeout(lblT); lblT = setTimeout(layoutLabels, 90); }
+function layoutLabels() {
+  const r = svg.getBoundingClientRect();
+  if (!r.width) return;
+  const s = view.w / r.width, h = view.w * r.height / r.width;
+  const x0 = view.x, y0 = view.y, x1 = x0 + view.w, y1 = y0 + h;
+  const placed = [], out = [];
+  const hit = b => placed.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+  // POI markers reserve their own spot.
+  for (const m of markers) if (m.kind === 'poi' && m.x > x0 && m.x < x1 && m.y > y0 && m.y < y1) placed.push([m.x - 5 * s, m.y - 5 * s, m.x + 5 * s, m.y + 5 * s]);
+  for (const [n, c, cand] of OSM.labels) {
+    const [fs, maxS] = LBL[c];
+    if (s > maxS) continue;
+    const w = n.length * fs * 0.56 * s / 2 + 4 * s, hh = fs * 0.7 * s;
+    for (let k = 0; k < cand.length; k += 3) {
+      const x = cand[k], y = cand[k + 1], ang = cand[k + 2];
+      if (x < x0 || x > x1 || y < y0 || y > y1) continue;
+      const ra = Math.abs(ang) * Math.PI / 180;
+      const bw = w * Math.cos(ra) + hh * Math.sin(ra), bh = w * Math.sin(ra) + hh * Math.cos(ra);
+      const box = [x - bw, y - bh, x + bw, y + bh];
+      if (hit(box)) continue;
+      placed.push(box);
+      out.push(`<text class="sl sl-${c}" transform="translate(${x} ${y}) rotate(${ang}) scale(${s.toFixed(4)})" text-anchor="middle" dy="0.35em">${esc(n)}</text>`);
+      break;
+    }
+    if (out.length > 240) break;
+  }
+  for (const w of WATER_LABELS) {
+    const [x, y] = proj(w.lat, w.lon);
+    if (x > x0 && x < x1 && y > y0 && y < y1) out.push(`<text class="sl water" transform="translate(${x} ${y}) rotate(-8) scale(${s.toFixed(4)})" text-anchor="middle" dy="0.35em">${w.n}</text>`);
+  }
+  $('#lblg').innerHTML = out.join('');
 }
 function zoomAt(cx, cy, f) {
   const r = svg.getBoundingClientRect();
@@ -148,7 +155,7 @@ function attachMapEvents() {
 }
 function renderMarkers() {
   if (!mapReady) return;
-  markers = markers.filter(m => m.kind === 'street');
+  markers = [];
   const g = $('#mkg'), top = $('#topg'), rg = $('#routeg');
   g.innerHTML = ''; top.innerHTML = ''; rg.innerHTML = '';
   const mode = S.mapMode;
@@ -171,7 +178,7 @@ function renderMarkers() {
     mk('circle', { r: 18, class: 'hit' }, el);
     if (n) { const t = mk('text', { class: 'num', 'text-anchor': 'middle', y: 4 }, el); t.textContent = n; }
     const t = mk('text', { class: 'name', x: n ? 14 : 10, y: 4 }, el); t.textContent = p.n;
-    markers.push({ el, x, y });
+    markers.push({ el, x, y, kind: 'poi' });
   }
   const h = hotelPt(), [hx, hy] = proj(h.lat, h.lon);
   const he = mk('g', { class: 'mk stop' }, top);

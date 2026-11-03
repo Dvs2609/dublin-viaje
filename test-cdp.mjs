@@ -91,6 +91,8 @@ check('detail -> map keeps hash', await ev(`location.hash`) === '#mapa' && await
 console.log('overflow-x', await ev(`document.documentElement.scrollWidth > innerWidth`));
 await sleep(800);
 console.log('sw controller', await ev(`!!navigator.serviceWorker.controller`));
+
+console.log('template problems:', await ev(`(()=>{const out=[];for(const dk of DAYKEYS){const saved=JSON.stringify(S.days[dk]);TEMPLATES[dk].forEach((t,i)=>{S.days[dk]=JSON.parse(saved);S.days[dk].stops=t.s.map(([id,dur])=>normStop({id,dur}));const c=computeDay(dk);const bad=c.rows.filter(r=>r.st&&(r.st.cls==='bad'||r.st.cls==='warn')).map(r=>r.p.id+':'+r.st.txt);const lim=toMin(S.days[dk].limit);if(lim!==null&&c.end>lim)bad.push('over limit '+fromMin(c.end));if(bad.length)out.push(dk+'/'+t.n+': '+bad.join(', '));});S.days[dk]=JSON.parse(saved);}return out.join(' || ')||'none'})()`));
 console.log('LOGS:\n' + logs.join('\n'));
 ws.close(); chrome.kill(); (await import('node:child_process')).spawnSync('pkill', ['-f', '[r]emote-debugging-port=93']);
 process.exit(0);
