@@ -294,6 +294,8 @@ main { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; -webki
 .door .go { grid-column: 1 / -1; background: #fff; color: var(--door); }
 .door .ghost { background: rgba(255,255,255,.16); color: #fff; }
 .door .ghost.on { background: var(--fan); color: #3A2500; }
+.door.busy { margin-bottom: 14px; }
+.door .ghost.wide { grid-column: 1 / -1; }
 .door.empty-door { --door: var(--ink); color: var(--bg); align-items: flex-start; }
 .wish { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px; }
 .wish li { display: flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding-left: 12px; min-height: 56px; }
@@ -1082,6 +1084,8 @@ const TRIP_START = [2026, 10, 5], TRIP_END = [2026, 10, 7];
 const TAB_HASH = { trip: 'mi-viaje', explore: 'buscar', map: 'mapa', info: 'info' };
 const OLD_HASH = { '#hoy': 'trip', '#plan': 'trip', '#explorar': 'explore' };
 const AIRPORT_AT = '13:15';
+// The Friday excursion is assumed to keep you out of Dublin until about this time.
+const EXC_BACK = '19:00';
 // Starting list for a fresh install: the places nobody wants to miss.
 const MUST = ['trinity', 'templebar', 'hapenny', 'grafton', 'stephens', 'molly', 'christchurch', 'stpatricks', 'castle', 'guinness', 'oconnell', 'merrion'];
 const CHECKLIST = [
@@ -1148,7 +1152,7 @@ const todayIndex = () => { const d = nowDate(); return dayIndex([d.getFullYear()
 function normItem(x) {
   const day = DAYKEYS.includes(x.day) ? x.day : null;
   const at = day && toMin(x.at) !== null ? String(x.at).slice(0, 5) : '';
-  return { id: x.id, day: at ? day : null, at, bought: !!x.bought, note: String(x.note || '').slice(0, 500), visited: !!x.visited,
+  return { id: x.id, day, at, bought: !!x.bought, note: String(x.note || '').slice(0, 500), visited: !!x.visited,
     visitedAt: x.visited && /^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(x.visitedAt || '') ? x.visitedAt : '' };
 }
 function normList(arr) {
@@ -1267,16 +1271,21 @@ const isFood = p => p.c === 'comer' || !!p.meal;
 const MEAL_WHY = { comida: 'Para comer', cena: 'Para cenar', desayuno: 'Para desayunar', merienda: 'Para merendar' };
 // Fixed-time things for a day: bookings, the Friday excursion and the Saturday airport run.
 function timedItems(dk) {
-  const out = S.list.filter(x => x.day === dk && x.at).map(x => ({ t: toMin(x.at), at: x.at, txt: BYID[x.id].n + (x.bought ? ' · entrada comprada' : ''), id: x.id }));
-  if (dk === 'vie') out.push({ t: toMin(S.excursion.time) ?? 8 * 60 + 30, at: S.excursion.time || '', txt: S.excursion.name ? `Excursión: ${S.excursion.name}` : 'Excursión (sin apuntar)', exc: true });
-  if (dk === 'sab') out.push({ t: toMin(AIRPORT_AT), at: AIRPORT_AT, txt: 'Salir hacia el aeropuerto', air: true });
+  const out = S.list.filter(x => x.day === dk && x.at && !x.visited).map(x => ({ t: toMin(x.at), at: x.at, txt: BYID[x.id].n + (x.bought ? ' · entrada comprada' : ''), id: x.id }));
+  if (dk === 'vie') out.push({ t: toMin(S.excursion.time) ?? 8 * 60 + 30, end: toMin(EXC_BACK), at: S.excursion.time || '', txt: S.excursion.name ? `Excursión: ${S.excursion.name}` : 'Excursión (sin apuntar)', exc: true });
+  if (dk === 'sab') out.push({ t: toMin(AIRPORT_AT), end: 24 * 60, at: AIRPORT_AT, txt: 'Salir hacia el aeropuerto', air: true });
   return out.sort((a, b) => a.t - b.t);
 }
 // Suggestions: filtered by the chosen chip, then scored (+40 saved, +30 right meal, +20 open the whole visit,
 // −1 per walking minute, −15 unknown hours). Places that would clash with the next fixed time are skipped.
+// While on the excursion or once it is time for the airport there is nothing to suggest in town.
+function busyNow(c) {
+  return timedItems(c.dk).find(x => x.end && c.t >= x.t && c.t < x.end) || null;
+}
 function rankSuggestions(mode, c) {
+  if (busyNow(c)) return [];
   const meal = mealNow(c.t), night = c.t >= toMin(SUNSET);
-  const next = timedItems(c.dk).find(x => x.t > c.t && !x.exc);
+  const next = timedItems(c.dk).find(x => x.t > c.t);
   const out = [];
   for (const p of PLACES) {
     const it = listItem(p.id);
@@ -1289,7 +1298,9 @@ function rankSuggestions(mode, c) {
     if (w > 40) continue;
     const f = fitNow(p, c.dk, c.t + w, p.dur);
     if (!f.ok) continue;
-    if (next && next.id !== p.id && c.t + w + Math.min(p.dur, 45) > next.t - 10) continue;
+    const booked = next && next.id === p.id;
+    if (booked && c.t + w > next.t) continue;
+    if (next && !booked && c.t + w + Math.min(p.dur, 45) > next.t - 10) continue;
     let sc = -w, why = '';
     if (it) { sc += 40; why = 'De vuestra lista'; }
     if (isFood(p)) {
@@ -1301,12 +1312,12 @@ function rankSuggestions(mode, c) {
     if (f.unknown) sc -= 15;
     if (night && p.out && !isFood(p)) sc += norm(p.k).includes('noche') ? 10 : -15;
     if (MUST.includes(p.id)) { sc += 8; why = why || 'Imprescindible'; }
-    if (next && next.id === p.id) { sc += 100; why = `Reserva a las ${next.at}`; }
+    if (booked) { sc += 100; why = `Reserva a las ${next.at}`; }
     out.push({ p, w, m, f, sc, why: why || (w <= 5 ? 'Aquí al lado' : '') });
   }
   out.sort((a, b) => (b.sc - a.sc) || (a.m - b.m) || a.p.id.localeCompare(b.p.id));
   // At meal times the best places to eat go first and fourth, so they are not buried under saved sights.
-  if (meal && mode === 'auto' && !(next && out[0] && out[0].p.id === next.id)) {
+  if (meal && mode === 'auto' && !(next && out[0] && out[0].p.id === next.id && out[0].why.startsWith('Reserva'))) {
     const food = out.filter(x => isFood(x.p) && norm(x.p.meal).includes(meal)).slice(0, 2);
     const rest = out.filter(x => !food.includes(x));
     if (food[0]) rest.splice(0, 0, food[0]);
@@ -1380,11 +1391,13 @@ function renderTrip() {
   } else {
     const light = c.t < sun ? `<span class="lightchip">${IC.sun}Luz hasta ${SUNSET}</span>` : `<span class="lightchip night">${IC.moon}De noche</span>`;
     html += `<div class="trip-head"><div class="when"><span class="big-clock">${fromMin(c.t)}</span><span class="day">${esc(DAYS[c.dk].label.split(' ·')[0])}</span></div>${light}</div>`;
-    const items = timedItems(c.dk).filter(x => x.t + 15 >= c.t);
+    const items = timedItems(c.dk).filter(x => (x.end || x.t + 15) >= c.t);
     if (items.length) html += `<div class="fixedrow">${items.map(x => { const left = x.t - c.t; return `<button class="fixed ${left <= 45 && left >= -15 ? 'urgent' : ''}" ${x.id ? `data-act="open" data-id="${x.id}"` : `data-act="goto" data-id="${x.exc ? 'sec-exc' : 'sec-air'}"`}><time>${esc(x.at || '—')}</time><span>${esc(x.txt)}${left > 0 && left <= 120 ? ` · en ${fmtMin(left)}` : ''}</span></button>`; }).join('')}</div>`;
   }
+  const busy = c.live && busyNow(c);
+  if (busy) html += busyCard(busy);
   const sugg = rankSuggestions(S.mode, c);
-  html += `<div class="sec-title"><h2>¿Y ahora qué?</h2><small>${c.live ? (c.label === 'el hotel' ? 'cerca del hotel' : `cerca de ${esc(c.label)}`) : 'así lo veréis el jueves a las 12:30'}</small></div>
+  if (!busy) html += `<div class="sec-title"><h2>¿Y ahora qué?</h2><small>${c.live ? (c.label === 'el hotel' ? 'cerca del hotel' : `cerca de ${esc(c.label)}`) : 'así lo veréis el jueves a las 12:30'}</small></div>
     <div class="chips modes">${MODES.map(([k, n]) => `<button class="chip" data-act="mode" data-id="${k}" aria-pressed="${S.mode === k}">${n}</button>`).join('')}</div>
     <div class="carousel" id="carousel">${sugg.length ? sugg.map(doorCard).join('') : `<article class="door empty-door"><h3>Nada abierto cerca ahora mismo</h3><p>Probad con otra opción de arriba o mirad el mapa.</p><span class="spacer"></span><div class="dbtns"><button class="go" data-act="tab" data-id="map">${IC.map}Ver el mapa</button></div></article>`}</div>
     ${c.live && !c.gps ? `<p><button class="btn small" data-act="gps">${IC.pin}Usar mi posición</button></p>` : ''}`;
@@ -1400,6 +1413,15 @@ function renderTrip() {
   const scroll = $('#carousel') ? $('#carousel').scrollLeft : 0;
   $('#view-trip').innerHTML = html;
   if (scroll && $('#carousel')) $('#carousel').scrollLeft = scroll;
+}
+function busyCard(b) {
+  if (b.air) return `<article class="door busy" data-c="ver"><span class="kind">Sábado</span><h3>Hora de ir al aeropuerto</h3>
+    <p>Vuelo sobre las 16:00: lo ideal es estar allí a las 14:00.</p><span class="spacer"></span>
+    <div class="dbtns"><a class="go" href="${appleMaps(hotelPt(), 'Leonardo Hotel Dublin ' + hotel().name.replace('Leonardo ', ''))}" target="_blank" rel="noopener">${IC.nav}Volver al hotel</a><button class="ghost wide" data-act="goto" data-id="sec-air">Cómo ir al aeropuerto</button></div></article>`;
+  const e = S.excursion;
+  return `<article class="door busy" data-c="parque"><span class="kind">Viernes · excursión</span><h3>${esc(e.name || 'Día de excursión')}</h3>
+    <p>${e.meetingPoint ? `Punto de encuentro: ${esc(e.meetingPoint)}` : 'Apuntad el punto de encuentro en Info.'}${e.time ? ` · salida ${esc(e.time)}` : ''}</p><span class="spacer"></span>
+    <div class="dbtns">${e.meetingPoint ? `<a class="go" href="https://maps.apple.com/?q=${encodeURIComponent(e.meetingPoint + ', Dublin')}&dirflg=w" target="_blank" rel="noopener">${IC.nav}Cómo llegar</a>` : ''}${e.url ? `<a class="ghost wide" href="${esc(e.url)}" target="_blank" rel="noopener">${IC.ext}Ver la reserva</a>` : `<button class="ghost wide" data-act="goto" data-id="sec-exc">Apuntar la excursión</button>`}</div></article>`;
 }
 function wishRow(x, p, m, c) {
   const f = x.visited ? null : fitNow(p, c.dk, c.t + walkMin(m), p.dur);
@@ -1544,7 +1566,7 @@ function editBooking(fn) {
 // ---------- Info ----------
 // DUBLIN1 codes. v2 carries the list (w); v1 codes carried a plan per day (d) and are converted on import.
 function packPlan() {
-  const o = { v: 2, h: S.hotel, w: S.list.map(x => [x.id, x.day || '', x.at, x.bought ? 1 : 0, x.note, x.visited ? 1 : 0]), c: S.checklist.map(c => [c.text, c.checked ? 1 : 0]), e: S.excursion };
+  const o = { v: 2, h: S.hotel, w: S.list.map(x => [x.id, x.day || '', x.at, x.bought ? 1 : 0, x.note, x.visited ? 1 : 0, x.visitedAt]), c: S.checklist.map(c => [c.text, c.checked ? 1 : 0]), e: S.excursion };
   return 'DUBLIN1:' + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 }
 function unpackPlan(txt) {
@@ -1553,7 +1575,7 @@ function unpackPlan(txt) {
   const o = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
   if (!o || typeof o !== 'object') throw new Error('code');
   let list;
-  if (Array.isArray(o.w)) list = normList(o.w.filter(Array.isArray).map(w => ({ id: w[0], day: w[1], at: w[2], bought: !!w[3], note: w[4], visited: !!w[5] })));
+  if (Array.isArray(o.w)) list = normList(o.w.filter(Array.isArray).map(w => ({ id: w[0], day: w[1], at: w[2], bought: !!w[3], note: w[4], visited: !!w[5], visitedAt: w[6] })));
   else {
     const days = {};
     for (const k of DAYKEYS) {
@@ -1718,7 +1740,7 @@ document.addEventListener('click', e => {
     case 'goto': closeDetail(false, () => gotoSection(id)); break;
     case 'text': S.largeText = id === '1'; save(); applyText(); renderInfo(); break;
     case 'mapfocus': closeDetail(false, () => showMap(id)); break;
-    case 'mapmode': S.mapMode = id; save(); renderMarkers(); break;
+    case 'mapmode': S.mapMode = id; if (id === 'list' && selId && !listItem(selId)) selId = null; save(); renderMarkers(); break;
     case 'mapclose': selectOnMap(null); break;
     case 'ckdel': S.checklist = S.checklist.filter(c => c.id !== id); save(); renderInfo(); break;
     case 'pickexc': { const t = TRIPS[i]; S.excursion = { ...S.excursion, name: t.n, url: t.u }; save(); renderInfo(); toast('Excursión apuntada'); break; }
