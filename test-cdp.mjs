@@ -20,7 +20,8 @@ await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-sch
 const go = async (hash = '') => { await send('Page.navigate', { url: 'http://127.0.0.1:8791/' + hash }); await sleep(1300); };
 const click = sel => ev(`(()=>{const e=document.querySelector(${JSON.stringify(sel)}); if(!e) throw new Error('no '+${JSON.stringify(sel)}); e.click()})()`);
 const sfx = dark ? '-dark' : '';
-const check = (name, ok, extra = '') => console.log((ok ? 'PASS ' : 'FAIL ') + name + (extra ? ' — ' + extra : ''));
+let failures = 0;
+const check = (name, ok, extra = '') => { if (!ok) failures++; console.log((ok ? 'PASS ' : 'FAIL ') + name + (extra ? ' — ' + extra : '')); };
 await go();
 check('opens on Hoy', await ev(`S.tab`) === 'today');
 check('hotel fixed', await ev(`S.hotel`) === 'christchurch');
@@ -46,11 +47,15 @@ check('optimizer keeps reserved/meal stops', await ev(`(()=>{const st=S.days.jue
 await ev(`window.DEBUG_NOW='2026-11-05T13:10'; setTab('today')`); await sleep(200);
 await shot('a4-hoy-trip' + sfx);
 const first = await ev(`document.querySelector('.nowtitle').innerText`);
+await click('[data-act=harrive]'); await sleep(100);
 await click('[data-act=hdone]'); await sleep(150);
 const second = await ev(`document.querySelector('.nowtitle').innerText`);
 check('Hecho advances to next stop', first !== second, first + ' -> ' + second);
 await click('[data-act=hskip]'); await sleep(150);
 check('Saltar marks skipped', await ev(`S.days.jue.stops.some(s=>s.skipped)`));
+await click('[data-act=harrive]'); await sleep(150);
+check('Ya hemos llegado shows current visit', (await ev(`document.querySelector('.nowcard .label').innerText`)).startsWith('Ahora') || (await ev(`document.querySelector('.nowcard .label').innerText`)).startsWith('AHORA'), await ev(`document.querySelector('.nowcard .label').innerText`));
+check('map skips numbering of skipped stops', await ev(`(()=>{S.mapMode='jue';setTab('map');const sk=S.days.jue.stops.find(s=>s.skipped).id;const el=document.querySelector('#mkg [data-id="'+sk+'"]');const r=!el.classList.contains('stop');setTab('today');return r})()`));
 await ev(`window.DEBUG_NOW='2026-11-07T12:50'; renderToday()`); await sleep(100);
 check('Saturday airport banner urgent', await ev(`!!document.querySelector('.banner.urgent')`));
 await shot('a5-hoy-sab' + sfx);
@@ -77,6 +82,14 @@ check('round trip', rt === "15:00|true|Localizador K-4821|13|George's Quay", rt)
 const old = 'DUBLIN1:' + Buffer.from(JSON.stringify({ v: 1, h: 'parnell', d: { jue: { s: '12:00', f: 'hotel', b: 1, l: '', n: 'nota', x: [['trinity', 60, 0], ['castle', 45, 1]] } } })).toString('base64');
 const oi = await ev(`(()=>{const r=unpackPlan(${JSON.stringify(old)});return r.hotel+'|'+r.days.jue.stops.map(s=>s.id+':'+s.dur+':'+s.done+':'+s.reservedAt).join(',')+'|'+(r.checklist===undefined)})()`);
 check('old v1 code imports', oi === 'parnell|trinity:60:false:,castle:45:true:|true', oi);
+await ev(`(()=>{S.excursion.name='Antes';S.checklist=[{id:'a',text:'Uno',checked:false}];})()`);
+await ev(`(()=>{document.querySelector('[data-tab=info]').click();document.querySelector('#io').value=${JSON.stringify(code)};document.querySelector('[data-act=import]').click();})()`); await sleep(150);
+await ev(`document.querySelector('#toast button').click()`); await sleep(150);
+check('undo import restores checklist and excursion', await ev(`S.excursion.name==='Antes' && S.checklist.length===1`), await ev(`S.excursion.name+'|'+S.checklist.length`));
+await ev(`(()=>{S.days.sab.stops=[normStop({id:'gpo',dur:60,note:'keep'})];S.days.vie.stops=[normStop({id:'gpo',dur:30})];setTab('plan');openSheet({kind:'stop',dk:'sab',id:'gpo'})})()`); await sleep(100);
+await click('[data-act=emoveday][data-day=vie]'); await sleep(150);
+check('move to day with duplicate keeps data', await ev(`S.days.sab.stops.length===1 && S.days.sab.stops[0].note==='keep'`));
+await ev(`closeDetail()`); await sleep(600);
 check('import clamps', await ev(`unpackPlan('DUBLIN1:'+btoa(JSON.stringify({v:1,d:{jue:{x:[['trinity',-50],['castle',99999],['nope',10],'bad']}}}))).days.jue.stops.map(s=>s.dur).join(',')`) === '5,360');
 check('gmaps splits long routes', await ev(`(()=>{S.days.vie.stops=PLACES.filter(p=>p.c!=='comer').slice(0,12).map(p=>normStop({id:p.id,dur:20}));return gmapsRoutes('vie').length})()`) === 2);
 check('fees parse', await ev(`[parsePrice(BYID.trinity),parsePrice(BYID.castle),parsePrice(BYID.molly),parsePrice(BYID.leoburdock)].map(String).join(' ')`) === '21,28 8,8 0,0 null');
@@ -94,5 +107,5 @@ console.log('sw controller', await ev(`!!navigator.serviceWorker.controller`));
 
 console.log('template problems:', await ev(`(()=>{const out=[];for(const dk of DAYKEYS){const saved=JSON.stringify(S.days[dk]);TEMPLATES[dk].forEach((t,i)=>{S.days[dk]=JSON.parse(saved);S.days[dk].stops=t.s.map(([id,dur])=>normStop({id,dur}));const c=computeDay(dk);const bad=c.rows.filter(r=>r.st&&(r.st.cls==='bad'||r.st.cls==='warn')).map(r=>r.p.id+':'+r.st.txt);const lim=toMin(S.days[dk].limit);if(lim!==null&&c.end>lim)bad.push('over limit '+fromMin(c.end));if(bad.length)out.push(dk+'/'+t.n+': '+bad.join(', '));});S.days[dk]=JSON.parse(saved);}return out.join(' || ')||'none'})()`));
 console.log('LOGS:\n' + logs.join('\n'));
-ws.close(); chrome.kill(); (await import('node:child_process')).spawnSync('pkill', ['-f', '[r]emote-debugging-port=93']);
-process.exit(0);
+ws.close(); chrome.kill(); if (failures) { console.log(failures + ' FAILURES'); } (await import('node:child_process')).spawnSync('pkill', ['-f', '[r]emote-debugging-port=93']);
+process.exit(failures ? 1 : 0);

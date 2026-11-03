@@ -293,6 +293,7 @@ textarea { width: 100%; min-height: 80px; border: 1px solid var(--line); backgro
 .clock { font: 800 calc(24px * var(--k))/1 var(--f-display); }
 .nowcard { border-left: 6px solid var(--c, var(--accent)); padding: 16px; gap: 10px; }
 .nowcard.done { border-left-color: var(--good); }
+.nowcard.here { background: var(--accent-soft); }
 .nowtitle { font: 800 calc(26px * var(--k))/1.1 var(--f-display); margin: 0; text-wrap: balance; }
 .nowtime { font: 800 calc(22px * var(--k))/1 var(--f-display); margin: 0; }
 .nowmeta { margin: 0; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
@@ -397,7 +398,7 @@ textarea { width: 100%; min-height: 80px; border: 1px solid var(--line); backgro
     <div class="mapbar">
       <div class="seg" id="mapmode" style="grid-auto-columns:auto"></div>
     </div>
-    <div class="mapnote" id="mapnote">© OpenStreetMap · Luas en morado</div>
+    <div class="mapnote" id="mapnote">© colaboradores de OpenStreetMap · Luas en morado</div>
     <div class="mapcard" id="mapcard" hidden></div>
     <div class="mapbtns">
       <button id="zin" aria-label="Acercar">+</button>
@@ -1064,7 +1065,8 @@ function renderMarkers() {
   g.innerHTML = ''; top.innerHTML = ''; rg.innerHTML = '';
   const mode = S.mapMode;
   const dayStops = mode !== 'all' ? S.days[mode].stops : [];
-  const stopIdx = new Map(dayStops.map((s, i) => [s.id, i + 1]));
+  // Same numbers as the plan; skipped stops get none, matching the drawn route.
+  const stopIdx = new Map(dayStops.map((s, i) => [s, i]).filter(([s]) => !s.skipped).map(([s, i]) => [s.id, i + 1]));
   if (mode !== 'all') {
     const c = computeDay(mode);
     if (c.rows.length) {
@@ -1193,7 +1195,8 @@ function defState(preload) {
 }
 function normStop(s) {
   return { id: s.id, dur: clampDur(+s.dur || BYID[s.id].dur), done: !!s.done, skipped: !!s.skipped,
-    reservedAt: toMin(s.reservedAt) !== null ? String(s.reservedAt).slice(0, 5) : '', ticketBought: !!s.ticketBought, note: String(s.note || '').slice(0, 500) };
+    reservedAt: toMin(s.reservedAt) !== null ? String(s.reservedAt).slice(0, 5) : '', ticketBought: !!s.ticketBought, note: String(s.note || '').slice(0, 500),
+    arrivedAt: toMin(s.arrivedAt) !== null ? String(s.arrivedAt).slice(0, 5) : '' };
 }
 function normExcursion(e) {
   e = e && typeof e === 'object' ? e : {};
@@ -1222,8 +1225,8 @@ let saveT;
 function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 120); }
 
 let undoSnap = null;
-function snapshot() { undoSnap = JSON.stringify({ days: S.days, hotel: S.hotel }); }
-function restore() { if (!undoSnap) return; const u = JSON.parse(undoSnap); S.days = u.days; S.hotel = u.hotel; undoSnap = null; save(); renderAll(); }
+function snapshot() { undoSnap = JSON.stringify({ days: S.days, hotel: S.hotel, checklist: S.checklist, excursion: S.excursion }); }
+function restore() { if (!undoSnap) return; const u = JSON.parse(undoSnap); Object.assign(S, u); undoSnap = null; save(); renderAll(); }
 
 // ---------- Geo & time ----------
 let GPS = null;
@@ -1296,12 +1299,19 @@ function hoursLabel(p) {
 
 // ---------- Plan logic ----------
 // Walks a list of {s, i} entries from a point and time. A reserved time is a minimum start: you wait if early.
-function walkPlan(dk, entries, from, t0, back) {
+// In live mode a stop with arrivedAt is the visit in progress: it starts when you arrived, with no walk.
+function walkPlan(dk, entries, from, t0, back, live) {
   let t = t0, prev = from, walkTot = 0, mTot = 0;
   const rows = [];
   for (const { s, i } of entries) {
     const p = BYID[s.id];
     if (!p) continue;
+    if (live && toMin(s.arrivedAt) !== null) {
+      const start = toMin(s.arrivedAt), dep = start + s.dur;
+      rows.push({ i, s, p, m: 0, w: 0, arr: start, start, wait: 0, late: 0, dep, here: true, st: statusAt(p, dk, start, dep) });
+      t = Math.max(dep, t); prev = p;
+      continue;
+    }
     const m = dist(prev, p), w = walkMin(m);
     t += w; walkTot += w; mTot += m;
     const arr = t, r = toMin(s.reservedAt);
@@ -1332,7 +1342,7 @@ function computeLive(dk) {
   const lastDone = [...d.stops].reverse().find(s => s.done && BYID[s.id]);
   const from = gpsInDublin() ? { lat: GPS.lat, lon: GPS.lon, n: 'tu posición' } : lastDone ? BYID[lastDone.id] : startPt(dk);
   const t0 = Math.max(nowMin(), toMin(d.start) ?? 0);
-  return { from, ...walkPlan(dk, entriesOf(d.stops, s => !s.done && !s.skipped), from, t0, d.back) };
+  return { from, ...walkPlan(dk, entriesOf(d.stops, s => !s.done && !s.skipped), from, t0, d.back, true) };
 }
 function planHits(id) {
   const out = [];
@@ -1542,20 +1552,25 @@ function renderTripDay(dk) {
   }
   const planned = plan.rows.find(r => r.i === next.i);
   const behind = planned ? next.start - planned.start : 0;
-  html += `<div class="nowcard" style="--c:${catVar(next.p.c)}">
-    <span class="label">Próxima parada · ${next.i + 1} de ${d.stops.length}</span>
+  html += `<div class="nowcard ${next.here ? 'here' : ''}" style="--c:${catVar(next.p.c)}">
+    <span class="label">${next.here ? 'Ahora estáis en' : 'Próxima parada'} · ${next.i + 1} de ${d.stops.length}</span>
     <h2 class="nowtitle">${esc(next.p.n)}</h2>
     <p class="nowtime tnum">${fromMin(next.start)}–${fromMin(next.dep)}</p>
-    <p class="nowmeta">${IC.walk}<span>${next.w} min a pie desde ${esc(live.from.n || 'aquí')} · llegada ${fromMin(next.arr)}</span></p>
+    ${next.here ? `<p class="nowmeta">${IC.clock}<span>Llegasteis a las ${esc(next.s.arrivedAt)}. Tiempo previsto: ${fmtMin(next.s.dur)}${now > next.dep ? ` · ya lleváis ${fmtMin(now - next.dep)} de más` : ` · quedan ${fmtMin(next.dep - now)}`}</span></p>`
+      : `<p class="nowmeta">${IC.walk}<span>${next.w} min a pie desde ${esc(live.from.n || 'aquí')} · llegada ${fromMin(next.arr)}</span></p>`}
     <div class="row">${pill(next.st)}${stopBadges(next.s, next)}</div>
     ${behind > 20 ? `<p class="behind">Vais ${fmtMin(behind)} más tarde que el plan. Si falta tiempo, saltad alguna parada.</p>` : ''}
-    <div class="bigbtns">
-      <a class="btn big primary" href="${appleMaps(next.p, next.p.n)}" target="_blank" rel="noopener">${IC.nav}Cómo llegar</a>
-      <button class="btn big" data-act="hdone" data-day="${dk}" data-i="${next.i}">${IC.check}Hecho</button>
-      <button class="btn big" data-act="hskip" data-day="${dk}" data-i="${next.i}">${IC.skip}Saltar</button>
+    <div class="bigbtns">${next.here
+      ? `<button class="btn big primary" data-act="hdone" data-day="${dk}" data-i="${next.i}">${IC.check}Hecho, seguimos</button>
       <button class="btn big" data-act="open" data-id="${next.p.id}">Ver ficha</button>
+      <button class="btn big" data-act="hskip" data-day="${dk}" data-i="${next.i}">${IC.skip}Saltar</button>
+      <button class="btn big" data-act="hleft" data-day="${dk}" data-i="${next.i}">Aún no hemos llegado</button>`
+      : `<a class="btn big primary" href="${appleMaps(next.p, next.p.n)}" target="_blank" rel="noopener">${IC.nav}Cómo llegar</a>
+      <button class="btn big" data-act="harrive" data-day="${dk}" data-i="${next.i}">${IC.check}Ya hemos llegado</button>
+      <button class="btn big" data-act="hskip" data-day="${dk}" data-i="${next.i}">${IC.skip}Saltar</button>
+      <button class="btn big" data-act="open" data-id="${next.p.id}">Ver ficha</button>`}
     </div>
-    <p class="muted hint">Pulsad Hecho al terminar la visita: las horas de lo que queda se recalculan.</p>
+    <p class="muted hint">${next.here ? 'Pulsad "Hecho" al terminar: las horas de lo que queda se recalculan.' : 'Pulsad "Ya hemos llegado" al entrar: así se cuenta el tiempo de la visita.'}</p>
   </div>`;
   const rest = live.rows.slice(1);
   if (rest.length) {
@@ -2000,6 +2015,13 @@ document.addEventListener('click', e => {
     case 'addmore': setTab('explore'); break;
     case 'nearme': S.sort = 'near'; S.cat = 'all'; setTab('explore'); startGPS(renderList); break;
     case 'text': S.largeText = id === '1'; save(); applyText(); renderInfo(); break;
+    case 'harrive': case 'hleft': {
+      const s = S.days[el.dataset.day].stops[i];
+      if (!s) break;
+      s.arrivedAt = a === 'harrive' ? fromMin(nowMin()) : '';
+      save(); renderAll();
+      break;
+    }
     case 'hdone': case 'hskip': {
       const s = S.days[el.dataset.day].stops[i];
       if (!s) break;
@@ -2019,9 +2041,9 @@ document.addEventListener('click', e => {
     case 'emoveday': {
       const from = S.days[sheet.dk], to = S.days[el.dataset.day], k = from.stops.findIndex(s => s.id === sheet.id);
       if (k < 0) break;
+      if (to.stops.some(x => x.id === sheet.id)) { toast(`Este sitio ya está en el plan del ${dayName(el.dataset.day)}`); break; }
       snapshot();
-      const [s] = from.stops.splice(k, 1);
-      if (!to.stops.some(x => x.id === s.id)) to.stops.push(s);
+      to.stops.push(from.stops.splice(k, 1)[0]);
       save(); closeDetail();
       toast(`Pasado al ${dayName(el.dataset.day)}`, 'Deshacer', restore);
       break;

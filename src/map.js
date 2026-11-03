@@ -160,7 +160,8 @@ function renderMarkers() {
   g.innerHTML = ''; top.innerHTML = ''; rg.innerHTML = '';
   const mode = S.mapMode;
   const dayStops = mode !== 'all' ? S.days[mode].stops : [];
-  const stopIdx = new Map(dayStops.map((s, i) => [s.id, i + 1]));
+  // Same numbers as the plan; skipped stops get none, matching the drawn route.
+  const stopIdx = new Map(dayStops.map((s, i) => [s, i]).filter(([s]) => !s.skipped).map(([s, i]) => [s.id, i + 1]));
   if (mode !== 'all') {
     const c = computeDay(mode);
     if (c.rows.length) {

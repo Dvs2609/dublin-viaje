@@ -293,6 +293,7 @@ textarea { width: 100%; min-height: 80px; border: 1px solid var(--line); backgro
 .clock { font: 800 calc(24px * var(--k))/1 var(--f-display); }
 .nowcard { border-left: 6px solid var(--c, var(--accent)); padding: 16px; gap: 10px; }
 .nowcard.done { border-left-color: var(--good); }
+.nowcard.here { background: var(--accent-soft); }
 .nowtitle { font: 800 calc(26px * var(--k))/1.1 var(--f-display); margin: 0; text-wrap: balance; }
 .nowtime { font: 800 calc(22px * var(--k))/1 var(--f-display); margin: 0; }
 .nowmeta { margin: 0; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
@@ -397,7 +398,7 @@ textarea { width: 100%; min-height: 80px; border: 1px solid var(--line); backgro
     <div class="mapbar">
       <div class="seg" id="mapmode" style="grid-auto-columns:auto"></div>
     </div>
-    <div class="mapnote" id="mapnote">© OpenStreetMap · Luas en morado</div>
+    <div class="mapnote" id="mapnote">© colaboradores de OpenStreetMap · Luas en morado</div>
     <div class="mapcard" id="mapcard" hidden></div>
     <div class="mapbtns">
       <button id="zin" aria-label="Acercar">+</button>
