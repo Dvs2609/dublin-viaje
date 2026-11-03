@@ -85,6 +85,27 @@ await click('[data-act=text][data-id="1"]'); await sleep(100);
 for (const t of ['trip','explore','map','info']) { await ev(`setTab('${t}')`); await sleep(150); if (await ev(`document.documentElement.scrollWidth > innerWidth`)) check('no overflow with big text on ' + t, false); }
 await ev(`window.DEBUG_NOW='2026-11-05T13:10'; setTab('trip')`); await sleep(200); await shot('b9-trip-big' + sfx);
 await ev(`window.DEBUG_NOW=''; S.largeText=false; applyText()`);
+
+// Review regressions: booking day chosen before the time, commitments, unreachable bookings, visitedAt.
+await ev(`setTab('trip')`);
+await ev(`openDetail('guinness')`); await sleep(120);
+await ev(`(()=>{const d=document.querySelector('#b-day');d.value='sab';d.dispatchEvent(new Event('change',{bubbles:true}))})()`); await sleep(80);
+await ev(`(()=>{const d=document.querySelector('#b-at');d.value='10:00';d.dispatchEvent(new Event('change',{bubbles:true}))})()`); await sleep(80);
+check('day chosen before time is kept', await ev(`listItem('guinness').day`) === 'sab', await ev(`JSON.stringify(listItem('guinness'))`));
+await ev(`closeDetail()`); await sleep(600);
+await ev(`window.DEBUG_NOW='2026-11-06T11:00'; renderTrip()`); await sleep(100);
+check('no town suggestions during the excursion', await ev(`rankSuggestions('auto', here()).length`) === 0 && await ev(`!!document.querySelector('.door.busy')`));
+await ev(`window.DEBUG_NOW='2026-11-06T07:50'; renderTrip()`); await sleep(100);
+check('before the excursion suggestions fit before it', await ev(`rankSuggestions('auto', here()).every(s=>here().t+s.w+Math.min(s.p.dur,45)<=8*60+20)`));
+await ev(`window.DEBUG_NOW='2026-11-07T13:31'; renderTrip()`); await sleep(100);
+check('after airport time no suggestions and card shown', await ev(`rankSuggestions('auto', here()).length`) === 0 && await ev(`document.querySelector('.door.busy h3').innerText`) === 'Hora de ir al aeropuerto');
+await shot('b10-airport' + sfx);
+await ev(`(()=>{const it=listItem('guinness'); it.day='jue'; it.at='15:00'; window.DEBUG_NOW='2026-11-05T14:55';})()`);
+check('unreachable booking not pushed first', !(await ev(`rankSuggestions('auto', here()).some(s=>s.why.startsWith('Reserva'))`)));
+await ev(`(()=>{const it=listItem('guinness'); it.visited=true; it.visitedAt='2026-11-05T14:30';})()`);
+check('visited booking no longer blocks', await ev(`timedItems('jue').every(x=>x.id!=='guinness')`));
+check('visitedAt travels in the code', await ev(`unpackPlan(packPlan()).list.find(x=>x.id==='guinness').visitedAt`) === '2026-11-05T14:30');
+await ev(`window.DEBUG_NOW=''`);
 // Codes: new round trip, old v1 plan codes, undo.
 const code = await ev(`packPlan()`);
 check('round trip', await ev(`(()=>{const r=unpackPlan(${JSON.stringify(code)});const t=r.list.find(x=>x.id==='trinity');return t.at==='15:00'&&t.bought&&t.visited&&r.list.length===S.list.length})()`));
